@@ -1,8 +1,8 @@
 import { useState, type DragEvent } from 'react';
 import { MoreHorizontal, Plus } from 'lucide-react';
-import type { Column, Task } from '@/types';
+import type { Column, Task } from '../../types/index';
 import { TaskCard } from './TaskCard';
-import { cn } from '@/utils/cn';
+import { cn } from '../../utils/cn';
 
 interface BoardColumnProps {
   column: Column;

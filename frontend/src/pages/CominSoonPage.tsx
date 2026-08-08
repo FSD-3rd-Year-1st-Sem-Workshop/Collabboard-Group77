@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
-import { DashboardShell } from '@/components/layout/DashboardShell';
-import { EmptyState } from '@/components/common/EmptyState';
+import { DashboardShell } from '../components/layout/DashboardShell';
+import { EmptyState } from '../components/common/EmptyState';
 
 interface ComingSoonPageProps {
   title: string;

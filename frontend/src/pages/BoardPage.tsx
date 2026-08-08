@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Star, UserPlus, MoreHorizontal } from 'lucide-react';
-import { DashboardShell } from '@/components/layout/DashboardShell';
-import { BoardColumn } from '@/components/board/BoardColumn';
-import { AddTaskModal } from '@/components/board/AddTaskModal';
-import { TaskDetailsModal } from '@/components/board/TaskDetailsModal';
-import { AvatarGroup } from '@/components/common/AvatarGroup';
-import { Button } from '@/components/common/Button';
-import { EmptyState } from '@/components/common/EmptyState';
-import { BOARD_COLUMNS } from '@/data/columns';
-import { mockUsers } from '@/data/users';
-import { useBoards } from '@/hooks/useBoards';
-import type { Task, TaskStatus } from '@/types';
-import { cn } from '@/utils/cn';
+import { DashboardShell } from '../components/layout/DashboardShell';
+import { BoardColumn } from '../components/board/BoardColumn';
+import { AddTaskModal } from '../components/board/AddTaskModal';
+import { TaskDetailsModal } from '../components/board/TaskDetailsModal';
+import { AvatarGroup } from '../components/common/AvatarGroup';
+import { Button } from '../components/common/Button';
+import { EmptyState } from '../components/common/EmptyState';
+import { BOARD_COLUMNS } from '../data/columns';
+import { mockUsers } from '../data/users';
+import { useBoards } from '../hooks/useBoards';
+import type { Task, TaskStatus } from '../types/index';
+import { cn } from '../utils/cn';
 
 export function BoardPage() {
   const { boardId } = useParams<{ boardId: string }>();

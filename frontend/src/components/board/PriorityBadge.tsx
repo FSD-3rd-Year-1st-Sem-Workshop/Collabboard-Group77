@@ -1,5 +1,5 @@
-import type { TaskPriority } from '@/types';
-import { Badge } from '@/components/common/Badge';
+import type { TaskPriority } from '../../types/index';
+import { Badge } from '../common/Badge';
 
 const priorityConfig: Record<TaskPriority, { label: string; tone: 'slate' | 'amber' | 'rose' }> = {
   low: { label: 'Low', tone: 'slate' },

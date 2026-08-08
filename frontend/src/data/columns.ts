@@ -1,4 +1,4 @@
-import type { Column } from '@/types';
+import type { Column } from '../types/index';
 
 // The board's three columns. Kept as data (not hardcoded JSX) so a future
 // "custom columns per board" feature only touches this layer.

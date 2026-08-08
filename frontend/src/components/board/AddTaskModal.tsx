@@ -1,12 +1,12 @@
 import { useState, type FormEvent } from 'react';
-import type { Board, Column, NewTaskInput, TaskPriority, TaskStatus } from '@/types';
-import { Modal } from '@/components/common/Modal';
-import { Input } from '@/components/common/Input';
-import { Textarea } from '@/components/common/Textarea';
-import { Select } from '@/components/common/Select';
-import { Button } from '@/components/common/Button';
-import { mockUsers } from '@/data/users';
-import { useBoards } from '@/hooks/useBoards';
+import type { Board, Column, NewTaskInput, TaskPriority, TaskStatus } from '../../types/index';
+import { Modal } from '../common/Modal';
+import { Input } from '../common/input';
+import { Textarea } from '../common/Textarea';
+import { Select } from '../common/Select';
+import { Button } from '../common/Button';
+import { mockUsers } from '../../data/users';
+import { useBoards } from '../../hooks/useBoards';
 
 interface AddTaskModalProps {
   board: Board;

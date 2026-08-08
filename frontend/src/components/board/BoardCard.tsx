@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import { Star, LayoutGrid } from 'lucide-react';
-import type { Board } from '@/types';
-import { AvatarGroup } from '@/components/common/AvatarGroup';
-import { mockUsers } from '@/data/users';
-import { getTasksByBoard } from '@/data/tasks';
-import { useBoards } from '@/hooks/useBoards';
-import { cn } from '@/utils/cn';
+import type { Board } from '../../types/index';
+import { AvatarGroup } from '../common/AvatarGroup';
+import { mockUsers } from '../../data/users';
+import { getTasksByBoard } from '../../data/tasks';
+import { useBoards } from '../../hooks/useBoards';
+import { cn } from '../../utils/cn';
 
 export function BoardCard({ board }: { board: Board }) {
   const { toggleStar, tasks } = useBoards();

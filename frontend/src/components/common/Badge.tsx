@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { cn } from '@/utils/cn';
+import { cn } from '../../utils/cn';
 
 type Tone = 'slate' | 'indigo' | 'rose' | 'amber' | 'emerald';
 

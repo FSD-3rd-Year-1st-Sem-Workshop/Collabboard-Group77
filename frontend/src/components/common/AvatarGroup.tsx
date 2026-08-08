@@ -1,4 +1,4 @@
-import type { User } from '@/types';
+import type { User } from '../../types/index';
 import { Avatar } from './Avatar';
 
 interface AvatarGroupProps {

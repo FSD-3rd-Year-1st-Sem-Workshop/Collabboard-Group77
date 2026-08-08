@@ -1,4 +1,4 @@
-import type { User } from '@/types';
+import type { User } from '../types/index';
 
 // Mock "users" table. In M2 this becomes a GET /api/users response
 // (or is looked up per-id from the JWT-authenticated session).

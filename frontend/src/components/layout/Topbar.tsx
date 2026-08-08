@@ -1,8 +1,8 @@
 import { useRef, useState, type ReactNode } from 'react';
 import { Bell, HelpCircle, ChevronDown, Search } from 'lucide-react';
-import { Avatar } from '@/components/common/Avatar';
-import { useAuth } from '@/hooks/useAuth';
-import { useClickOutside } from '@/hooks/useClickOutside';
+import { Avatar } from '../common/Avatar';
+import { useAuth } from '../../hooks/useAuth';
+import { useClickOutside } from '../../hooks/useClickOutside';
 
 interface TopbarProps {
   /** Optional right-aligned slot rendered before the icon cluster (e.g. page-specific actions). */

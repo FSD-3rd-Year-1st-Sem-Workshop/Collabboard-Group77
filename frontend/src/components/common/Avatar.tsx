@@ -1,5 +1,5 @@
-import type { User } from '@/types';
-import { cn } from '@/utils/cn';
+import type { User } from '../../types/index';
+import { cn } from '../../utils/cn';
 
 interface AvatarProps {
   user: User;

@@ -1,6 +1,6 @@
 import {createContext , useEffect , useState , type ReactNode} from 'react';
 import type { User} from '../types/index';
-import {currentUser} from '@/data/users';
+import {currentUser} from '../data/users';
 
 const STORAGE_KEY = 'collabboard.session';
 //  Fake session toekn for the storeage

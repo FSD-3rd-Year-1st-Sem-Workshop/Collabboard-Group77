@@ -1,4 +1,4 @@
-import type { Task } from '@/types';
+import type { Task } from '../types/index';
 
 // Mock "tasks" table. In M3 this is replaced by Mongoose documents fetched
 // per board; the shape of Task in src/types stays the same so components

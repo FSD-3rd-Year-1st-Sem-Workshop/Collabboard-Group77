@@ -1,4 +1,4 @@
-import type { Board } from '@/types';
+import type { Board } from '../types/index';
 
 // Mock "boards" table. In M2 this becomes a GET /api/boards response scoped
 // to the logged-in user.

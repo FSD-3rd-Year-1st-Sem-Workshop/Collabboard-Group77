@@ -1,9 +1,9 @@
 import { createContext, useReducer, type ReactNode } from 'react';
-import type { Board, NewTaskInput, Task, TaskStatus } from '@/types';
-import { mockBoards } from '@/data/boards';
-import { mockTasks } from '@/data/tasks';
-import { generateId } from '@/utils/id';
-import { currentUser } from '@/data/users';
+import type { Board, NewTaskInput, Task, TaskStatus } from '../types/index';
+import { mockBoards } from '../data/boards';
+import { mockTasks } from '../data/tasks';
+import { generateId } from '../utils/id';
+import { currentUser } from '../data/users';
 
 interface BoardState {
   boards: Board[];
