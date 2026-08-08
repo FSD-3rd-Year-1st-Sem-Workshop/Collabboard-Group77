@@ -1,7 +1,7 @@
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from '@/context/AuthContext';
-import { BoardProvider } from '@/context/BoardContext';
-import { AppRoutes } from '@/routes/AppRoutes';
+import { AuthProvider } from '../src/context/AuthContext';
+import { BoardProvider } from '../src/context/BoardContext';
+import { AppRoutes } from '../src/routes/AppRoutes';
 
 function App() {
   return (
