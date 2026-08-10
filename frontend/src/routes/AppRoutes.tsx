@@ -1,17 +1,18 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Star, Activity, Settings } from 'lucide-react';
-import { LoginPage } from '../pages/LoginPage';
+import { LoginPage } from '../pages/loginpage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { BoardPage } from '../pages/BoardPage';
 import { ComingSoonPage } from '../pages/CominSoonPage';
 import { NotFoundPage } from '../pages/NotFoundPage.tsx';
+import { LandingPage } from '../pages/LandingPage';
 import { ProtectedRoute } from './ProtectedRoute';
 
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<LandingPage />} />
 
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
