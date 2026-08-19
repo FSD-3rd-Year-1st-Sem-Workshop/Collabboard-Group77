@@ -55,13 +55,13 @@ export function BoardPage() {
   return (
     <DashboardShell>
       <div className="flex h-full flex-col">
-        <div className="flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
+        <div className="flex items-center justify-between border-b border-white/5 bg-[#101a2e] px-6 py-4">
           <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold text-slate-900">Board: {board.name}</h1>
+            <h1 className="text-lg font-semibold text-slate-100">Board: {board.name}</h1>
             <button
               onClick={() => toggleStar(board.id)}
               aria-label={board.starred ? 'Unstar board' : 'Star board'}
-              className="rounded-md p-1 hover:bg-slate-100"
+              className="rounded-md p-1 hover:bg-white/10"
             >
               <Star className={cn('h-[18px] w-[18px]', board.starred ? 'fill-amber-400 text-amber-400' : 'text-slate-300')} />
             </button>
@@ -75,7 +75,7 @@ export function BoardPage() {
             </Button>
             <button
               aria-label="Board options"
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50"
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-slate-400 hover:bg-white/10"
             >
               <MoreHorizontal className="h-4 w-4" />
             </button>
@@ -86,7 +86,7 @@ export function BoardPage() {
           </div>
         </div>
 
-        <div className="flex flex-1 gap-4 overflow-x-auto p-6">
+        <div className="flex flex-1 gap-4 overflow-x-auto bg-[#0b1220] p-6">
           {BOARD_COLUMNS.map((column) => (
             <BoardColumn
               key={column.id}

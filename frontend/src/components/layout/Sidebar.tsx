@@ -19,10 +19,12 @@ export function Sidebar() {
   const { logout } = useAuth();
 
   return (
-    <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-[#0c182b] bg-[#0c182b]">
-      <div className="flex items-center gap-2 px-6 py-5">
-        <Kanban className="h-5 w-5 text-primary-400" strokeWidth={2.5} />
-        <span className="text-base font-semibold text-slate-100">CollabBoard</span>
+    <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-white/5 bg-[#0d1729]">
+      <div className="flex items-center gap-2 px-6 py-6">
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-500/15 text-primary-400">
+          <Kanban className="h-5 w-5" strokeWidth={2.5} />
+        </div>
+        <span className="text-base font-semibold tracking-tight text-slate-100">CollabBoard</span>
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 px-3">
@@ -32,10 +34,10 @@ export function Sidebar() {
             to={to}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-primary-50 text-primary-700'
-                  : 'text-slate-300 hover:bg-blue-200 hover:text-slate-900'
+                  ? 'bg-primary-500/15 text-primary-300 shadow-[inset_3px_0_0_#4f83ff]'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
               )
             }
           >
@@ -45,10 +47,10 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t px-3 py-4">
+      <div className="border-t border-white/5 px-3 py-4">
         <button
           onClick={logout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-100 border-2 transition-colors hover:bg-red-400 hover:text-slate-900"
+          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 transition-colors hover:bg-rose-500/10 hover:text-rose-300"
         >
           <LogOut className="h-[18px] w-[18px]" />
           Logout

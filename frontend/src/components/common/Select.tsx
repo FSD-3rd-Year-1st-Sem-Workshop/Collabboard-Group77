@@ -10,7 +10,7 @@ export function Select({ label, id, className, children, ...props }: SelectProps
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={id} className="text-sm font-medium text-slate-700">
+        <label htmlFor={id} className="text-sm font-medium text-slate-300">
           {label}
         </label>
       )}
@@ -18,7 +18,7 @@ export function Select({ label, id, className, children, ...props }: SelectProps
         <select
           id={id}
           className={cn(
-            'w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2 pr-9 text-sm text-slate-900',
+            'w-full appearance-none rounded-xl border border-white/10 bg-[#182541] px-3 py-2 pr-9 text-sm text-slate-100',
             'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
             className
           )}
