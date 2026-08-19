@@ -28,7 +28,7 @@ export function Modal({ title, onClose, children, widthClassName = 'max-w-md' }:
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#050a14]/75 p-4 backdrop-blur-sm"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -37,10 +37,10 @@ export function Modal({ title, onClose, children, widthClassName = 'max-w-md' }:
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className={`w-full ${widthClassName} max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-xl`}
+        className={`w-full ${widthClassName} max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#182541] shadow-2xl`}
       >
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-          <h2 id="modal-title" className="text-base font-semibold text-slate-900">
+        <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+          <h2 id="modal-title" className="text-base font-semibold text-slate-100">
             {title}
           </h2>
           <IconButton aria-label="Close dialog" onClick={onClose}>

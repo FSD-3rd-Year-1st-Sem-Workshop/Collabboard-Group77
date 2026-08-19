@@ -97,7 +97,7 @@ export function RegisterPage() {
 
         {error && <p className="text-sm text-rose-600">{error}</p>}
 
-        <label className="flex items-start gap-2 text-sm text-slate-600">
+        <label className="flex items-start gap-2 text-sm text-slate-400">
           <input
             type="checkbox"
             checked={agreedToTerms}
