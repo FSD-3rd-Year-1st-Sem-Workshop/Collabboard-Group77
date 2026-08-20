@@ -9,5 +9,7 @@ declare module "express-serve-static-core" {
       avatar?: string | null;
     };
     userId?: string;
+    workspace?: any;
+    workspaceMember?: any;
   }
 }

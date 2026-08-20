@@ -11,6 +11,7 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/Auth.routes.js";
 import workspaceRoutes from "./routes/Workspace.routes.js";
 import dashboardRoutes from "./routes/Dashboard.routes.js";
+import invitationRoutes from "./routes/Invitation.routes.js";
 import {
     notFoundHandler,
     errorHandler
@@ -62,6 +63,7 @@ app.get("/", (_req: Request, res: Response) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/workspaces", workspaceRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/invitations", invitationRoutes);
 
 // Serve the raw OpenAPI spec as JSON so Scalar can load it
 const specPath = path.join(__dirname, "openapi.yaml");
