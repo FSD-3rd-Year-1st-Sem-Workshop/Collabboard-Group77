@@ -80,9 +80,272 @@ components:
         message:
           type: string
 
+    WorkspaceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: ws001
+        name:
+          type: string
+          example: Software Engineering Team
+        description:
+          type: string
+          example: Final year project
+        logo:
+          type: string
+          nullable: true
+          example: null
+        color:
+          type: string
+          example: "#2563EB"
+        visibility:
+          type: string
+          enum: [private, team]
+          example: private
+        role:
+          type: string
+          enum: [owner, admin, member]
+          example: owner
+        memberCount:
+          type: integer
+          example: 5
+        boardCount:
+          type: integer
+          example: 3
+
+    WorkspaceResponseBody:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/WorkspaceResponse"
+        message:
+          type: string
+          example: Workspace retrieved successfully
+
+    WorkspaceListResponseBody:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkspaceResponse"
+        message:
+          type: string
+          example: Workspaces retrieved successfully
+
+    CreateWorkspaceBody:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: Software Engineering Team
+        description:
+          type: string
+          maxLength: 500
+          example: Collabboard final year project
+        logo:
+          type: string
+          example: null
+        color:
+          type: string
+          example: "#2563EB"
+        visibility:
+          type: string
+          enum: [private, team]
+          example: private
+
+    UpdateWorkspaceBody:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: Team Alpha
+        description:
+          type: string
+          maxLength: 500
+          example: Updated description
+        logo:
+          type: string
+          example: null
+        color:
+          type: string
+          example: "#2563EB"
+        visibility:
+          type: string
+          enum: [private, team]
+          example: private
+
+    DashboardResponseBody:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            user:
+              type: object
+              properties:
+                id:
+                  type: string
+                  example: u001
+                name:
+                  type: string
+                  example: Paba
+                avatarUrl:
+                  type: string
+                  nullable: true
+                  example: null
+            workspaces:
+              type: array
+              items:
+                $ref: "#/components/schemas/WorkspaceResponse"
+            summary:
+              type: object
+              properties:
+                workspaceCount:
+                  type: integer
+                  example: 1
+                assignedTaskCount:
+                  type: integer
+                  example: 8
+                overdueTaskCount:
+                  type: integer
+                  example: 2
+        message:
+          type: string
+          example: Dashboard data retrieved successfully
+
+    WorkspaceMember:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: "60c72b2f9b1d8a23d8c11234"
+        name:
+          type: string
+          example: "Jane Doe"
+        email:
+          type: string
+          format: email
+          example: "jane@example.com"
+        avatar:
+          type: string
+          nullable: true
+          example: null
+        bio:
+          type: string
+          example: "Software Engineer specializing in interfaces."
+        role:
+          type: string
+          enum: [owner, admin, member]
+          example: "member"
+        status:
+          type: string
+          enum: [active, invited, suspended]
+          example: "active"
+
+    WorkspaceMembersResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            workspaceId:
+              type: string
+              example: "60c72b2f9b1d8a23d8c11234"
+            members:
+              type: array
+              items:
+                $ref: "#/components/schemas/WorkspaceMember"
+        message:
+          type: string
+          example: "Workspace members retrieved successfully"
+
+    WorkspaceInvitation:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "60c72b2f9b1d8a23d8c11235"
+        workspace:
+          type: string
+          example: "60c72b2f9b1d8a23d8c11234"
+        email:
+          type: string
+          format: email
+          example: "friend@example.com"
+        role:
+          type: string
+          enum: [admin, member]
+          example: "member"
+        invitedBy:
+          type: string
+          example: "60c72b2f9b1d8a23d8c11236"
+        status:
+          type: string
+          enum: [pending, accepted, declined, expired]
+          example: "pending"
+        expiresAt:
+          type: string
+          format: date-time
+          example: "2026-08-27T08:21:23.000Z"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    WorkspaceInvitationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/WorkspaceInvitation"
+        message:
+          type: string
+          example: "Invitation sent successfully"
+
+    WorkspaceInvitationListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkspaceInvitation"
+        message:
+          type: string
+          example: "Workspace invitations retrieved successfully"
+
 tags:
   - name: Auth
     description: Authentication endpoints
+  - name: Workspaces
+    description: Workspace management endpoints
+  - name: Dashboard
+    description: Dashboard overview endpoints
 
 paths:
   /api/auth/register:
@@ -189,6 +452,597 @@ paths:
           description: All sessions revoked
         "401":
           description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/dashboard:
+    get:
+      summary: Get dashboard metrics and member workspaces statistics for current user
+      tags: [Dashboard]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Dashboard data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardResponseBody"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/workspaces:
+    post:
+      summary: Create a new workspace and assign owner access to current user
+      tags: [Workspaces]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWorkspaceBody"
+      responses:
+        "201":
+          description: Workspace created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceResponseBody"
+        "400":
+          description: Validation or parameter constraints failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    get:
+      summary: Retrieve all workspaces where the current user is a member
+      tags: [Workspaces]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Workspaces retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceListResponseBody"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/workspaces/{id}:
+    get:
+      summary: Open details of a workspace (requires active membership)
+      tags: [Workspaces]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Workspace database identifier
+      responses:
+        "200":
+          description: Workspace retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceResponseBody"
+        "400":
+          description: Invalid workspace identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Access denied (caller is not a member)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Workspace not found or active
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    patch:
+      summary: Update a workspace's details (requires owner or admin member role)
+      tags: [Workspaces]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Workspace database identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWorkspaceBody"
+      responses:
+        "200":
+          description: Workspace updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceResponseBody"
+        "400":
+          description: Parameter validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Insufficient permissions (requires owner or admin role)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Workspace not found or active
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: Archive a workspace (requires owner or admin role)
+      tags: [Workspaces]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Workspace database identifier
+      responses:
+        "200":
+          description: Workspace archived successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      status:
+                        type: string
+                  message:
+                    type: string
+        "400":
+          description: Invalid workspace identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Workspace not found or active
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/workspaces/{workspaceId}/members:
+    get:
+      summary: Retrieve all active members in the workspace
+      tags: [Workspaces]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9b1d8a23d8c11234"
+      responses:
+        "200":
+          description: Workspace members retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceMembersResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Access denied (caller is not a member of the workspace)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/workspaces/{workspaceId}/members/{userId}:
+    patch:
+      summary: Update workspace member role
+      tags: [Workspaces]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9b1d8a23d8c11234"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9b1d8a23d8c11235"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role:
+                  type: string
+                  enum: [admin, member]
+                  example: "admin"
+      responses:
+        "200":
+          description: Member role updated successfully
+        "400":
+          description: Invalid input or user role transition blocked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Access denied (requires Owner role)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    delete:
+      summary: Remove a member from the workspace (or leave workspace)
+      tags: [Workspaces]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9b1d8a23d8c11234"
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9b1d8a23d8c11235"
+      responses:
+        "200":
+          description: Member removed or left workspace successfully
+        "400":
+          description: Owner cannot leave without transferring ownership
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Access denied (caller has insufficient credentials to remove target member)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/workspaces/{workspaceId}/invitations:
+    post:
+      summary: Send an invitation to join the workspace
+      tags: [Workspaces]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9b1d8a23d8c11234"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "friend@example.com"
+                role:
+                  type: string
+                  enum: [admin, member]
+                  default: "member"
+      responses:
+        "201":
+          description: Invitation sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceInvitationResponse"
+        "400":
+          description: Target is already a member, or invitation already pending
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Access denied (requires workspace Owner or Admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+    get:
+      summary: List all invitations for a workspace
+      tags: [Workspaces]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9b1d8a23d8c11234"
+      responses:
+        "200":
+          description: Workspace invitations retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceInvitationListResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Access denied (requires workspace Owner or Admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/workspaces/{workspaceId}/invitations/{invitationId}:
+    delete:
+      summary: Revoke an invitation
+      tags: [Workspaces]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9b1d8a23d8c11234"
+        - name: invitationId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9b1d8a23d8c11236"
+      responses:
+        "200":
+          description: Invitation revoked successfully
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Access denied (requires workspace Owner or Admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Invitation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/invitations/my:
+    get:
+      summary: List all active invitations for the logged-in user
+      tags: [Workspaces]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: My pending invitations retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceInvitationListResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/invitations/{invitationId}/accept:
+    post:
+      summary: Accept a workspace invitation
+      tags: [Workspaces]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: invitationId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9b1d8a23d8c11236"
+      responses:
+        "200":
+          description: Invitation accepted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: "#/components/schemas/WorkspaceMember"
+                  message:
+                    type: string
+                    example: "Invitation accepted successfully. Welcome to the workspace!"
+        "400":
+          description: Invitation expired, already accepted/declined, or caller is already a member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Access denied (invitation belongs to a different email address)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Invitation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/invitations/{invitationId}/decline:
+    post:
+      summary: Decline a workspace invitation
+      tags: [Workspaces]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: invitationId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "60c72b2f9b1d8a23d8c11236"
+      responses:
+        "200":
+          description: Invitation declined successfully
+        "400":
+          description: Invitation expired, or already accepted/declined
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Access denied (invitation belongs to a different email address)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Invitation not found
           content:
             application/json:
               schema:
