@@ -70,7 +70,7 @@ export function LoginPage() {
         {error && <p className="text-sm text-rose-600">{error}</p>}
 
         <div className="flex items-center justify-between text-sm">
-          <label className="flex items-center gap-2 text-slate-600">
+          <label className="flex items-center gap-2 text-slate-400">
             <input
               type="checkbox"
               checked={rememberMe}

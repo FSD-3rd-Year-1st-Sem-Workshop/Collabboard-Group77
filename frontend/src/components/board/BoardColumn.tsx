@@ -37,17 +37,17 @@ export function BoardColumn({
   }
 
   return (
-    <div className="flex w-72 shrink-0 flex-col rounded-xl bg-slate-50/60 p-3">
+    <div className="flex w-72 shrink-0 flex-col rounded-2xl border border-white/5 bg-[#111b30] p-3">
       <div className="mb-3 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold text-slate-700">{column.title}</h3>
-          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-200 px-1.5 text-xs font-medium text-slate-600">
+          <h3 className="text-sm font-semibold text-slate-200">{column.title}</h3>
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-white/10 px-1.5 text-xs font-medium text-slate-400">
             {tasks.length}
           </span>
         </div>
         <button
           aria-label={`${column.title} column options`}
-          className="rounded-md p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-600"
+          className="rounded-md p-1 text-slate-500 hover:bg-white/10 hover:text-slate-200"
         >
           <MoreHorizontal className="h-4 w-4" />
         </button>
@@ -75,7 +75,7 @@ export function BoardColumn({
 
       <button
         onClick={() => onAddTask(column.id)}
-        className="mt-2 flex items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-slate-500 hover:bg-slate-200/60 hover:text-slate-700"
+        className="mt-2 flex items-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-slate-500 hover:bg-white/10 hover:text-slate-200"
       >
         <Plus className="h-4 w-4" />
         Add Task

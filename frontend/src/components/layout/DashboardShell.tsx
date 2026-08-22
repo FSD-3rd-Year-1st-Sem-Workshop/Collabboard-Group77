@@ -11,7 +11,7 @@ interface DashboardShellProps {
  * authenticated page, so pages only need to render what's inside the frame. */
 export function DashboardShell({ children, topbarActions }: DashboardShellProps) {
   return (
-    <div className="flex h-screen overflow-hidden bg-canvas">
+    <div className="app-shell flex h-screen overflow-hidden bg-canvas">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar actions={topbarActions} />
