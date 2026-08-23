@@ -1,5 +1,8 @@
-import mongoose from "mongoose";
 import env from "./Env.js";
+import dns from "dns";
+import mongoose from "mongoose";
+
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 export async function connectDatabase(): Promise<typeof mongoose> {
   mongoose.connection.on("connected", () => {
