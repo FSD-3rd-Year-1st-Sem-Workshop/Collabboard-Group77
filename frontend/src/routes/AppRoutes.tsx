@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Star, Activity, Settings } from 'lucide-react';
-import { LoginPage } from '../pages/LoginPage';
+import { LoginPage } from '../pages/loginpage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { BoardPage } from '../pages/BoardPage';
