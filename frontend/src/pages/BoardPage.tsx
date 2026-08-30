@@ -11,7 +11,7 @@ import { EmptyState } from '../components/common/EmptyState';
 import { BOARD_COLUMNS } from '../data/columns';
 import { mockUsers } from '../data/users';
 import { useBoards } from '../hooks/useBoards';
-import type { Task, TaskStatus } from '../types/index';
+import type { Board, Task, TaskStatus } from '../types/index';
 import { cn } from '../utils/cn';
 
 export function BoardPage() {
@@ -19,7 +19,16 @@ export function BoardPage() {
   const navigate = useNavigate();
   const { boards, tasks, toggleStar, moveTask } = useBoards();
 
-  const board = boards.find((b) => b.id === boardId);
+  const foundBoard = boards.find((b) => b.id === boardId);
+
+  // Fallback board object if opening a workspace directly
+  const board: Board | undefined = foundBoard ?? (boardId ? {
+    id: boardId,
+    name: 'Workspace Board',
+    starred: false,
+    memberIds: ['user_1', 'user_2'],
+    coverColor: 'bg-indigo-100',
+  } : undefined);
 
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const [addTaskStatus, setAddTaskStatus] = useState<TaskStatus | null>(null);
@@ -35,14 +44,14 @@ export function BoardPage() {
             description="It may have been deleted, or the link is wrong."
           />
           <Button variant="secondary" onClick={() => navigate('/dashboard')}>
-            Back to My Boards
+            Back to Workspaces
           </Button>
         </div>
       </DashboardShell>
     );
   }
 
-  const boardTasks = tasks.filter((task) => task.boardId === board.id);
+  const boardTasks = tasks.filter((task) => task.boardId === board.id || !foundBoard);
   const members = mockUsers.filter((user) => board.memberIds.includes(user.id));
 
   function handleDropTask(status: TaskStatus) {

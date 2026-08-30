@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Kanban } from 'lucide-react';
+
 
 interface AuthLayoutProps {
   title: string;

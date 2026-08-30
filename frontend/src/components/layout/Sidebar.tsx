@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom';
-import { KanbanSquare, Star, Activity, Settings, LogOut, Kanban } from 'lucide-react';
+import { KanbanSquare, Star, Activity, Settings, LogOut } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../hooks/useAuth';
+
 
 // Note: the wireframe lists "Dashboard" and "My Boards" as separate items,
 // but both point at the same boards grid in this mock build, so they're

@@ -41,7 +41,44 @@ export interface Column {
   title: string;
 }
 
-/** Shape of the payload the "Add Task" modal collects before an id is assigned. */
+export interface Workspace {
+  id: string;
+  name: string;
+  description?: string | null;
+  logo?: string | null;
+  color?: string | null;
+  visibility?: 'private' | 'public' | string;
+  role?: string;
+  memberCount?: number;
+  boardCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateWorkspaceInput {
+  name: string;
+  description?: string;
+  logo?: string | null;
+  color?: string;
+  visibility?: 'private' | 'public';
+}
+
+export interface DashboardSummary {
+  workspaceCount: number;
+  assignedTaskCount: number;
+  overdueTaskCount: number;
+}
+
+export interface DashboardData {
+  user: {
+    id: string;
+    name: string;
+    avatarUrl?: string | null;
+  };
+  workspaces: Workspace[];
+  summary: DashboardSummary;
+}
+
 export interface NewTaskInput {
   title: string;
   description: string;
@@ -50,3 +87,10 @@ export interface NewTaskInput {
   assigneeId: string | null;
   dueDate: string | null;
 }
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken?: string;
+}
+
+
