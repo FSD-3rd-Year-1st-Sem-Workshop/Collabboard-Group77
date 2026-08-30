@@ -6,7 +6,6 @@ import { Button } from '../components/common/Button';
 import { authFetch } from '../utils/authFetch';
 import { useAuth } from '../hooks/useAuth';
 import { useBoards } from '../hooks/useBoards';
-// import { BoardCard } from '../components/board/BoardCard';\
 import { Input } from '../components/common/input';
 import { Modal } from '../components/common/Modal';
 
@@ -160,6 +159,38 @@ export function DashboardPage() {
       {isCreating && (
         <Modal title="Create New Board" onClose={() => setIsCreating(false)}>
           <form onSubmit={handleCreateBoard} className="flex flex-col gap-4">
+            <Input
+              id="new-board-name"
+              label="Board name"
+              placeholder="e.g. Product Launch"
+              value={newBoardName}
+              onChange={(e) => setNewBoardName(e.target.value)}
+              autoFocus
+            />
+            <Input
+              id="new-board-name"
+              label="Board name"
+              placeholder="e.g. Product Launch"
+              value={newBoardName}
+              onChange={(e) => setNewBoardName(e.target.value)}
+              autoFocus
+            />
+            <Input
+              id="new-board-name"
+              label="Board name"
+              placeholder="e.g. Product Launch"
+              value={newBoardName}
+              onChange={(e) => setNewBoardName(e.target.value)}
+              autoFocus
+            />
+            <Input
+              id="new-board-name"
+              label="Board name"
+              placeholder="e.g. Product Launch"
+              value={newBoardName}
+              onChange={(e) => setNewBoardName(e.target.value)}
+              autoFocus
+            />
             <Input
               id="new-board-name"
               label="Board name"

@@ -22,7 +22,7 @@ export function Sidebar() {
     <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-white/5 bg-[#0d1729]">
       <div className="flex items-center gap-2 px-6 py-6">
         <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-500/15 text-primary-400">
-          <Kanban className="h-5 w-5" strokeWidth={2.5} />
+          <img src="/favicon_cb.png" alt="logo" />
         </div>
         <span className="text-base font-semibold tracking-tight text-slate-100">CollabBoard</span>
       </div>
