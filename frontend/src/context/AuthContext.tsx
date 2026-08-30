@@ -1,10 +1,10 @@
 import { createContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { User } from '../types/index';
-import { clearAccessToken } from '../utils/authFetch';
+import { clearAccessToken, setAccessToken } from '../utils/authFetch';
 
 const STORAGE_KEY = 'collabboard.session';
 const ACCESS_TOKEN_KEY = 'collabboard.accessToken';
-const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
+const apiBaseUrl = import.meta.env.VITE_BACKEND_URL;
 
 function normalizeUser(rawUser: any): User {
   return {
@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(normalizedUser);
 
       if (accessToken) {
-        localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+        setAccessToken(accessToken);
       }
 
       return { success: true };

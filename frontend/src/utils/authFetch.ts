@@ -1,14 +1,18 @@
 const ACCESS_TOKEN_KEY = 'collabboard.accessToken';
 
 export function getAccessToken(): string | null {
+  const stored = localStorage.getItem(ACCESS_TOKEN_KEY);
+  if (stored) return stored;
   return sessionStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
 export function setAccessToken(token: string) {
+  localStorage.setItem(ACCESS_TOKEN_KEY, token);
   sessionStorage.setItem(ACCESS_TOKEN_KEY, token);
 }
 
 export function clearAccessToken() {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
   sessionStorage.removeItem(ACCESS_TOKEN_KEY);
 }
 
@@ -35,7 +39,9 @@ export async function authFetchWithRefresh(input: RequestInfo | URL, init: Reque
     return response;
   }
 
-  const refreshResponse = await fetch('http://localhost:5000/api/auth/refresh', {
+  const apiBaseUrl = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:5000';
+
+  const refreshResponse = await fetch(`${apiBaseUrl}/api/auth/refresh`, {
     method: 'POST',
     credentials: 'include',
     headers: {
