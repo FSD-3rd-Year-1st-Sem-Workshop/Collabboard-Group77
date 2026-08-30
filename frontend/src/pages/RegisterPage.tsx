@@ -3,17 +3,19 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { Input } from '../components/common/input';
 import { Button } from '../components/common/Button';
-import { useAuth } from '../hooks/useAuth';
 
 export function RegisterPage() {
-  const { register } = useAuth();
   const navigate = useNavigate();
+  const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [bio, setBio] = useState('');
+
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -21,25 +23,61 @@ export function RegisterPage() {
     event.preventDefault();
     setError('');
 
+    const trimmedName = name.trim();
+
+    if (!trimmedName || !email.trim() || !password || !confirmPassword) {
+      setError('Please fill in all required fields.');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
+      return;
+    }
+
     if (!agreedToTerms) {
       setError('You need to agree to the Terms & Conditions to continue.');
       return;
     }
 
     setIsSubmitting(true);
-    const result = await register(name, email, password);
-    setIsSubmitting(false);
 
-    if (!result.success) {
-      setError(result.error ?? 'Something went wrong. Please try again.');
-      return;
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          fullName: trimmedName,
+          email: email.trim(),
+          password,
+          bio: bio.trim(),
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setError(data?.message || 'Registration failed. Please try again.');
+        return;
+      }
+
+      navigate('/login', { replace: true });
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError('Unable to connect to the backend server.');
+    } finally {
+      setIsSubmitting(false);
     }
-    navigate('/dashboard', { replace: true });
   }
+
 
   return (
     <AuthLayout
@@ -94,6 +132,17 @@ export function RegisterPage() {
           autoComplete="new-password"
           required
         />
+        
+        <Input
+          id="bio"
+          label="Profile Bio"
+          placeholder="A Machine-Learning Engineer Loves to Explore..."
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+          autoComplete="off"
+          required
+        />
+
 
         {error && <p className="text-sm text-rose-600">{error}</p>}
 

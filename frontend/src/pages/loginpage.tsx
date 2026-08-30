@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { Input } from '../components/common/input';
@@ -6,9 +6,9 @@ import { Button } from '../components/common/Button';
 import { useAuth } from '../hooks/useAuth';
 
 export function LoginPage() {
-  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated, login } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,20 +16,40 @@ export function LoginPage() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const redirectTo = (location.state as { from?: string })?.from ?? '/dashboard';
+  useEffect(() => {
+    if (isAuthenticated) {
+      const redirectTo = (location.state as { from?: string } | null)?.from ?? '/dashboard';
+      navigate(redirectTo, { replace: true });
+    }
+  }, [isAuthenticated, location.state, navigate]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError('');
-    setIsSubmitting(true);
-    const result = await login(email, password);
-    setIsSubmitting(false);
 
-    if (!result.success) {
-      setError(result.error ?? 'Something went wrong. Please try again.');
+    if (!email.trim() || !password) {
+      setError('Please enter both email and password.');
       return;
     }
-    navigate(redirectTo, { replace: true });
+
+    setIsSubmitting(true);
+
+    try {
+      const result = await login(email.trim(), password);
+
+      if (!result.success) {
+        setError(result.error || 'Login failed. Please try again.');
+        return;
+      }
+
+      const redirectTo = (location.state as { from?: string } | null)?.from ?? '/dashboard';
+      navigate(redirectTo, { replace: true });
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Unable to connect to the backend server.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
