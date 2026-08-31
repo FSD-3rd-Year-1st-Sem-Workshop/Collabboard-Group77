@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Kanban } from 'lucide-react';
+
 
 interface AuthLayoutProps {
   title: string;
@@ -14,7 +14,7 @@ export function AuthLayout({ title, subtitle, children, footer }: AuthLayoutProp
       <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-[#111d33] p-8 shadow-2xl shadow-black/30">
         <div className="mb-6 flex flex-col items-center text-center">
           <div className="mb-3 flex items-center gap-2">
-            <Kanban className="h-5 w-5 text-blue-400" strokeWidth={2.5} />
+            <img src="/favicon_cb.png" className='w-10 h-10'/>
             <span className="text-base font-semibold text-white">
               CollabBoard
             </span>

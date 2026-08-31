@@ -1,10 +1,9 @@
 import { createContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { User } from '../types/index';
-import { clearAccessToken } from '../utils/authFetch';
+import { getAccessToken, clearTokens } from '../utils/authFetch';
+import { getCurrentUserApi, loginApi, logoutApi, registerApi } from '../api/auth';
 
 const STORAGE_KEY = 'collabboard.session';
-const ACCESS_TOKEN_KEY = 'collabboard.accessToken';
-const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
 
 function normalizeUser(rawUser: any): User {
   return {
@@ -18,9 +17,10 @@ function normalizeUser(rawUser: any): User {
 export interface AuthContextValue {
   user: User | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -37,16 +37,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   });
 
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function initAuth() {
+      const token = getAccessToken();
+      if (!token) {
+        if (!cancelled) setIsLoading(false);
+        return;
+      }
+
+      try {
+        const meUser = await getCurrentUserApi();
+        if (!cancelled && meUser) {
+          setUser(meUser);
+        }
+      } catch (err) {
+        console.warn('Failed to validate session token:', err);
+        if (!cancelled) {
+          setUser(null);
+          clearTokens();
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    initAuth();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useEffect(() => {
     if (user) {
-      const session = {
-        user,
-        accessToken: localStorage.getItem(ACCESS_TOKEN_KEY),
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ user }));
     } else {
       localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(ACCESS_TOKEN_KEY);
     }
   }, [user]);
 
@@ -56,45 +88,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const response = await fetch(`${apiBaseUrl}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-        }),
-      });
+      const responseData = await loginApi({ email: email.trim(), password });
+      const sessionUser = responseData?.data?.user ?? responseData?.user;
 
-      const payload = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        return {
-          success: false,
-          error: payload?.message || 'Login failed. Please try again.',
-        };
-      }
-
-      const sessionUser = payload?.data?.user;
-      const accessToken = payload?.data?.accessToken;
-
-      if (!sessionUser) {
-        return { success: false, error: 'No user data returned from the server.' };
-      }
-
-      const normalizedUser = normalizeUser(sessionUser);
-      setUser(normalizedUser);
-
-      if (accessToken) {
-        localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+      if (sessionUser) {
+        setUser(normalizeUser(sessionUser));
+      } else {
+        // Fallback: try calling getCurrentUserApi if user not directly in response
+        const meUser = await getCurrentUserApi();
+        setUser(meUser);
       }
 
       return { success: true };
     } catch (error) {
       console.error('Login error:', error);
-      return { success: false, error: 'Unable to connect to the backend server.' };
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unable to connect to the backend server.',
+      };
     }
   };
 
@@ -104,44 +115,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const response = await fetch(`${apiBaseUrl}/api/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          fullName: name.trim(),
-          email: email.trim(),
-          password,
-          bio: '',
-        }),
+      await registerApi({
+        fullName: name.trim(),
+        email: email.trim(),
+        password,
+        bio: '',
       });
-
-      const payload = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        return {
-          success: false,
-          error: payload?.message || 'Registration failed. Please try again.',
-        };
-      }
-
       return { success: true };
     } catch (error) {
       console.error('Register error:', error);
-      return { success: false, error: 'Unable to connect to the backend server.' };
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unable to connect to the backend server.',
+      };
     }
   };
 
-  const logout = () => {
-    clearAccessToken();
+  const logout = async () => {
+    await logoutApi();
     setUser(null);
   };
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isAuthenticated: !!user, login, register, logout }),
-    [user]
+    () => ({ user, isAuthenticated: !!user, isLoading, login, register, logout }),
+    [user, isLoading]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

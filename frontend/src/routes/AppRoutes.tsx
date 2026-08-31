@@ -1,11 +1,11 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Star, Activity, Settings } from 'lucide-react';
-import { LoginPage } from '../pages/loginpage';
+import { LoginPage } from '../pages/LoginPage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { BoardPage } from '../pages/BoardPage';
-import { ComingSoonPage } from '../pages/CominSoonPage';
-import { NotFoundPage } from '../pages/NotFoundPage.tsx';
+import { ComingSoonPage } from '../pages/ComingSoonPage';
+import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
 
 export function AppRoutes() {
@@ -21,6 +21,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/workspaces/:workspaceId"
+        element={
+          <ProtectedRoute>
+            <BoardPage />
           </ProtectedRoute>
         }
       />
