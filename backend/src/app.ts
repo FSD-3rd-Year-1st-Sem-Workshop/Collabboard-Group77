@@ -12,6 +12,9 @@ import authRoutes from "./routes/Auth.routes.js";
 import workspaceRoutes from "./routes/Workspace.routes.js";
 import dashboardRoutes from "./routes/Dashboard.routes.js";
 import invitationRoutes from "./routes/Invitation.routes.js";
+import boardRoutes from "./routes/Board.routes.js";
+import columnRoutes from "./routes/Column.routes.js";
+import taskRoutes from "./routes/Task.routes.js";
 import {
     notFoundHandler,
     errorHandler
@@ -64,6 +67,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/workspaces", workspaceRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/invitations", invitationRoutes);
+app.use("/api/boards", boardRoutes);
+app.use("/api/columns", columnRoutes);
+app.use("/api/tasks", taskRoutes);
 
 // Serve the raw OpenAPI spec as JSON so Scalar can load it
 const specPath = path.join(__dirname, "openapi.yaml");
