@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { KanbanSquare, Star, Activity, Settings, LogOut } from 'lucide-react';
+import { KanbanSquare, Star, Activity, Settings, LogOut, UserRoundPen } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -13,6 +13,7 @@ const navItems = [
   { to: '/dashboard', label: 'My Boards', icon: KanbanSquare },
   { to: '/starred', label: 'Starred', icon: Star },
   { to: '/activity', label: 'Activity', icon: Activity },
+  { to: '/profile', label: 'Edit Profile', icon: UserRoundPen },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
