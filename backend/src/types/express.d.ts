@@ -11,5 +11,9 @@ declare module "express-serve-static-core" {
     userId?: string;
     workspace?: any;
     workspaceMember?: any;
+    resolvedWorkspaceId?: string;
+    board?: any;
+    column?: any;
+    task?: any;
   }
 }

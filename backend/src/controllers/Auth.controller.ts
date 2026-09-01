@@ -8,7 +8,9 @@ import {
   refreshUserTokens,
   revokeRefreshToken,
   revokeAllUserTokens,
-  getUserById
+  getUserById,
+  updateUserProfile,
+  changeUserPassword
 } from "../services/Auth.service.js";
 
 const REFRESH_COOKIE_NAME = "refreshToken";
@@ -189,6 +191,57 @@ export async function me(
       { user },
       200,
       "Profile fetched successfully"
+    );
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateProfile(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<Response | void> {
+  try {
+    if (!req.userId) {
+      throw new AppError("Authentication required", 401);
+    }
+
+    const user = await updateUserProfile(req.userId, req.body);
+
+    return sendSuccess(res, { user }, 200, "Profile updated successfully");
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function changePassword(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<Response | void> {
+  try {
+    if (!req.userId) {
+      throw new AppError("Authentication required", 401);
+    }
+
+    const result = await changeUserPassword(
+      req.userId,
+      req.body.currentPassword,
+      req.body.newPassword,
+      {
+        userAgent: req.get("user-agent"),
+        ipAddress: req.ip
+      }
+    );
+
+    setRefreshCookie(res, result.refreshToken);
+
+    return sendSuccess(
+      res,
+      { accessToken: result.accessToken, user: result.user },
+      200,
+      "Password changed successfully"
     );
   } catch (error) {
     next(error);

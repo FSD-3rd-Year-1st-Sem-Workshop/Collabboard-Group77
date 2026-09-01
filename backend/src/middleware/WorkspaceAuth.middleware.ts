@@ -4,8 +4,7 @@ import Workspace from "../models/Workspace.js";
 import WorkspaceMember from "../models/Workspace_members.js";
 import { AppError } from "../utils/AppError.js";
 
-/**
- * Middleware to ensure the user is an active member of the workspace.
+/** Middleware to ensure the user is an active member of the workspace.
  * Resolves workspaceId from route params (either workspaceId or id).
  */
 export async function requireWorkspaceMember(
@@ -15,7 +14,7 @@ export async function requireWorkspaceMember(
 ): Promise<Response | void> {
     try {
         const { workspaceId, id } = req.params;
-        const targetWorkspaceId = workspaceId || id;
+        const targetWorkspaceId = req.resolvedWorkspaceId || workspaceId || id;
 
         if (
             !targetWorkspaceId ||
@@ -60,8 +59,7 @@ export async function requireWorkspaceMember(
     }
 }
 
-/**
- * Middleware factory to restrict actions to specific roles within a workspace.
+/*Middleware factory to restrict actions to specific roles within a workspace.
  * Must be executed after requireWorkspaceMember.
  */
 export function requireWorkspaceRole(allowedRoles: string[]) {

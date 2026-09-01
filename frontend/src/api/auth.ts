@@ -54,13 +54,64 @@ export async function getCurrentUserApi(): Promise<User> {
     throw new Error(data?.message || 'Authentication required');
   }
 
-  const rawUser = data?.data ?? data?.user ?? data;
+  const rawUser = data?.data?.user ?? data?.data ?? data?.user ?? data;
   return {
     id: String(rawUser?.id ?? rawUser?._id ?? 'user-unknown'),
     name: rawUser?.fullName ?? rawUser?.name ?? rawUser?.email ?? 'User',
     email: rawUser?.email ?? '',
     avatarColor: rawUser?.avatarColor ?? 'bg-[#00A884]',
   };
+}
+
+export interface ProfileUser {
+  id: string;
+  fullName: string;
+  email: string;
+  bio: string;
+  avatar: string | null;
+}
+
+function readProfile(data: any): ProfileUser {
+  const rawUser = data?.data?.user ?? data?.data ?? data?.user ?? data;
+  return {
+    id: String(rawUser?.id ?? rawUser?._id ?? ''),
+    fullName: rawUser?.fullName ?? rawUser?.name ?? '',
+    email: rawUser?.email ?? '',
+    bio: rawUser?.bio ?? '',
+    avatar: rawUser?.avatar ?? null,
+  };
+}
+
+export async function getProfileApi(): Promise<ProfileUser> {
+  const response = await authFetchWithRefresh(`${API_BASE_URL}/api/auth/me`);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || 'Unable to load profile.');
+  return readProfile(data);
+}
+
+export async function updateProfileApi(payload: { fullName: string; bio: string; avatar: string | null }): Promise<ProfileUser> {
+  const response = await authFetchWithRefresh(`${API_BASE_URL}/api/auth/me`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || 'Unable to update profile.');
+  return readProfile(data);
+}
+
+export async function changePasswordApi(payload: { currentPassword: string; newPassword: string }): Promise<ProfileUser> {
+  const response = await authFetchWithRefresh(`${API_BASE_URL}/api/auth/me/password`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || 'Unable to change password.');
+
+  const accessToken = data?.data?.accessToken ?? data?.accessToken;
+  if (accessToken) setTokens({ accessToken });
+  return readProfile(data);
 }
 
 export async function logoutApi() {

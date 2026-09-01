@@ -28,6 +28,11 @@ import {
     revokeInvitation
 } from "../controllers/WorkspaceInvitation.controller.js";
 import { sendInvitationValidator } from "../validators/Invitation.validator.js";
+import {
+    listWorkspaceBoards,
+    createBoard
+} from "../controllers/Board.controller.js";
+import { createBoardValidator } from "../validators/Board.validator.js";
 
 const router = express.Router();
 
@@ -113,6 +118,22 @@ router.delete(
     requireWorkspaceMember,
     requireWorkspaceRole(["owner", "admin"]),
     revokeInvitation
+);
+
+// Workspace Boards routes
+router.post(
+    "/:workspaceId/boards",
+    requireWorkspaceMember,
+    requireWorkspaceRole(["owner", "admin", "member"]),
+    createBoardValidator,
+    validateRequest,
+    createBoard
+);
+
+router.get(
+    "/:workspaceId/boards",
+    requireWorkspaceMember,
+    listWorkspaceBoards
 );
 
 export default router;

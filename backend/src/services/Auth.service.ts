@@ -242,3 +242,71 @@ export async function getUserById(userId: string): Promise<SafeUser> {
 
   return toSafeUser(user);
 }
+
+export interface UpdateProfileInput {
+  fullName?: string;
+  bio?: string;
+  avatar?: string | null;
+}
+
+/** Update fields that belong to the currently authenticated user's public profile. */
+export async function updateUserProfile(
+  userId: string,
+  data: UpdateProfileInput
+): Promise<SafeUser> {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  if (data.fullName !== undefined) user.fullName = data.fullName;
+  if (data.bio !== undefined) user.bio = data.bio;
+  if (data.avatar !== undefined) user.avatar = data.avatar;
+
+  await user.save();
+
+  return toSafeUser(user);
+}
+
+/**
+ * Changes a password only after verifying the current password. All existing
+ * sessions are revoked, then a fresh access/refresh-token pair is issued for
+ * the session making this request.
+ */
+export async function changeUserPassword(
+  userId: string,
+  currentPassword: string,
+  newPassword: string,
+  metadata?: SessionMetadata
+): Promise<LoginResult> {
+  const user = await User.findById(userId).select("+passwordHash");
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  const currentPasswordMatches = await comparePassword(
+    currentPassword,
+    user.passwordHash as string
+  );
+
+  if (!currentPasswordMatches) {
+    throw new AppError("Current password is incorrect", 401);
+  }
+
+  if (currentPassword === newPassword) {
+    throw new AppError("New password must be different from the current password", 400);
+  }
+
+  user.passwordHash = await hashPassword(newPassword);
+  await user.save();
+
+  await revokeAllUserTokens(user._id.toString());
+
+  return {
+    user: toSafeUser(user),
+    accessToken: generateAccessToken(user),
+    refreshToken: await storeRefreshToken(user._id, metadata)
+  };
+}

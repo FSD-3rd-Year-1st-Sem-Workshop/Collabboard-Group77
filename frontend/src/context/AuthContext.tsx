@@ -1,4 +1,4 @@
-import { createContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { User } from '../types/index';
 import { getAccessToken, clearTokens } from '../utils/authFetch';
 import { getCurrentUserApi, loginApi, logoutApi, registerApi } from '../api/auth';
@@ -20,6 +20,7 @@ export interface AuthContextValue {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  updateUser: (rawUser: unknown) => void;
   logout: () => Promise<void>;
 }
 
@@ -131,14 +132,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateUser = useCallback((rawUser: unknown) => {
+    setUser(normalizeUser(rawUser));
+  }, []);
+
   const logout = async () => {
     await logoutApi();
     setUser(null);
   };
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isAuthenticated: !!user, isLoading, login, register, logout }),
-    [user, isLoading]
+    () => ({ user, isAuthenticated: !!user, isLoading, login, register, updateUser, logout }),
+    [user, isLoading, updateUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
