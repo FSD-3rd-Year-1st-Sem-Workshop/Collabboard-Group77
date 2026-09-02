@@ -5,7 +5,6 @@ import { Input } from '../common/input';
 import { Textarea } from '../common/Textarea';
 import { Select } from '../common/Select';
 import { Button } from '../common/Button';
-import { mockUsers } from '../../data/users';
 import { useBoards } from '../../hooks/useBoards';
 
 interface AddTaskModalProps {
@@ -17,7 +16,7 @@ interface AddTaskModalProps {
 
 export function AddTaskModal({ board, columns, defaultStatus, onClose }: AddTaskModalProps) {
   const { addTask } = useBoards();
-  const boardMembers = mockUsers.filter((user) => board.memberIds.includes(user.id));
+  const boardMembers: any[] = [];
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');

@@ -70,3 +70,39 @@ export async function removeMemberApi(workspaceId: string, userId: string): Prom
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data?.message || 'Failed to remove member.');
 }
+
+export async function deleteWorkspaceApi(id: string): Promise<void> {
+  const response = await authFetchWithRefresh(`${API_BASE_URL}/api/workspaces/${id}`, {
+    method: 'DELETE',
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || 'Failed to delete workspace.');
+}
+
+export async function createInvitationApi(workspaceId: string, email: string, role: string): Promise<any> {
+  const response = await authFetchWithRefresh(`${API_BASE_URL}/api/workspaces/${workspaceId}/invitations`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, role }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || 'Failed to create invitation.');
+  return data?.data;
+}
+
+export async function getInvitationsApi(workspaceId: string): Promise<any[]> {
+  const response = await authFetchWithRefresh(`${API_BASE_URL}/api/workspaces/${workspaceId}/invitations`, {
+    method: 'GET'
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || 'Failed to fetch invitations.');
+  return data?.data ?? [];
+}
+
+export async function deleteInvitationApi(workspaceId: string, invitationId: string): Promise<void> {
+  const response = await authFetchWithRefresh(`${API_BASE_URL}/api/workspaces/${workspaceId}/invitations/${invitationId}`, {
+    method: 'DELETE',
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || 'Failed to delete invitation.');
+}
