@@ -6,7 +6,7 @@ import { Button } from '../components/common/Button';
 
 export function RegisterPage() {
   const navigate = useNavigate();
-  const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:5000';
+  const apiBaseUrl = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:5000';
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -140,7 +140,6 @@ export function RegisterPage() {
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           autoComplete="off"
-          required
         />
 
 
