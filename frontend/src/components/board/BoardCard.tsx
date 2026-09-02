@@ -2,17 +2,13 @@ import { Link } from 'react-router-dom';
 import { Star, LayoutGrid } from 'lucide-react';
 import type { Board } from '../../types/index';
 import { AvatarGroup } from '../common/AvatarGroup';
-import { mockUsers } from '../../data/users';
-import { getTasksByBoard } from '../../data/tasks';
 import { useBoards } from '../../hooks/useBoards';
 import { cn } from '../../utils/cn';
 
 export function BoardCard({ board }: { board: Board }) {
   const { toggleStar, tasks } = useBoards();
-  const members = mockUsers.filter((user) => board.memberIds.includes(user.id));
-  // Prefer live task count from context so it updates as tasks are added;
-  // falls back to the static seed helper for boards with no context tasks yet.
-  const taskCount = tasks.filter((t) => t.boardId === board.id).length || getTasksByBoard(board.id).length;
+  const members: any[] = [];
+  const taskCount = tasks.filter((t) => t.boardId === board.id).length;
 
   return (
     <div className="group relative rounded-2xl border border-white/10 bg-[#151f36] p-4 shadow-lg shadow-black/10 transition-all hover:-translate-y-0.5 hover:border-primary-400/40 hover:shadow-primary-950/30">

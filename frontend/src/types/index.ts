@@ -66,6 +66,17 @@ export interface WorkspaceMember {
   joinedAt?: string;
 }
 
+export interface WorkspaceInvitation {
+  id: string;
+  workspaceId: string;
+  email: string;
+  role: 'admin' | 'member' | string;
+  status: 'pending' | 'accepted' | 'declined' | string;
+  token?: string;
+  expiresAt?: string;
+  createdAt?: string;
+}
+
 export interface CreateWorkspaceInput {
   name: string;
   description?: string;

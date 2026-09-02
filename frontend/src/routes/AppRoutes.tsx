@@ -9,6 +9,7 @@ import { ComingSoonPage } from '../pages/ComingSoonPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { ProfilePage } from '../pages/ProfilePage';
+import { WorkspaceSettingsPage } from '../pages/WorkspaceSettingsPage';
 
 export function AppRoutes() {
   return (
@@ -31,6 +32,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <WorkspacePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/workspaces/:workspaceId/settings"
+        element={
+          <ProtectedRoute>
+            <WorkspaceSettingsPage />
           </ProtectedRoute>
         }
       />
