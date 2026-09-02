@@ -1,7 +1,9 @@
 import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { User } from '../types/index';
-import { getAccessToken, clearTokens } from '../utils/authFetch';
+import { getAccessToken, clearTokens, setTokens } from '../utils/authFetch';
 import { getCurrentUserApi, loginApi, logoutApi, registerApi } from '../api/auth';
+
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:5000';
 
 const STORAGE_KEY = 'collabboard.session';
 
@@ -18,7 +20,7 @@ export interface AuthContextValue {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>;
   register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   updateUser: (rawUser: unknown) => void;
   logout: () => Promise<void>;
@@ -46,7 +48,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function initAuth() {
       const token = getAccessToken();
       if (!token) {
-        if (!cancelled) setIsLoading(false);
+        // No access token in storage – try silent refresh via httpOnly cookie
+        // (cookie is not readable from JS, so we must attempt refresh)
+        try {
+          const refreshRes = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({}),
+          });
+          if (refreshRes.ok) {
+            const refreshData = await refreshRes.json().catch(() => ({} as any));
+            const newToken = refreshData?.data?.accessToken ?? refreshData?.accessToken;
+            if (newToken) {
+              setTokens({ accessToken: newToken });
+              try {
+                const meUser = await getCurrentUserApi();
+                if (!cancelled && meUser) {
+                  setUser(meUser);
+                }
+              } catch {
+                // me failed even after refresh – will be handled below
+              } finally {
+                if (!cancelled) setIsLoading(false);
+              }
+              return;
+            }
+          }
+        } catch {
+          // silent refresh failed – fall through to unauthenticated
+        }
+        // Ensure stale localStorage user is cleared when no token and refresh failed
+        if (!cancelled) {
+          setUser(null);
+          clearTokens();
+          setIsLoading(false);
+        }
         return;
       }
 
@@ -83,13 +120,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  const login: AuthContextValue['login'] = async (email, password) => {
+  const login: AuthContextValue['login'] = async (email, password, rememberMe = true) => {
     if (!email || !password) {
       return { success: false, error: 'Enter both an email and a password.' };
     }
 
     try {
-      const responseData = await loginApi({ email: email.trim(), password });
+      const responseData = await loginApi({ email: email.trim(), password }, rememberMe);
       const sessionUser = responseData?.data?.user ?? responseData?.user;
 
       if (sessionUser) {

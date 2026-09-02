@@ -35,7 +35,7 @@ export function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      const result = await login(email.trim(), password);
+      const result = await login(email.trim(), password, rememberMe);
 
       if (!result.success) {
         setError(result.error || 'Login failed. Please try again.');

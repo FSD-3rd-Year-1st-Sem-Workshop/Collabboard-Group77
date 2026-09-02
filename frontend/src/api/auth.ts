@@ -21,7 +21,7 @@ export async function registerApi(payload: { fullName: string; email: string; pa
   return data;
 }
 
-export async function loginApi(credentials: { email: string; password: string }) {
+export async function loginApi(credentials: { email: string; password: string }, rememberMe = true) {
   const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
     method: 'POST',
     headers: {
@@ -40,7 +40,7 @@ export async function loginApi(credentials: { email: string; password: string })
   const refreshToken = data?.data?.refreshToken ?? data?.refreshToken;
 
   if (accessToken) {
-    setTokens({ accessToken, refreshToken });
+    setTokens({ accessToken, refreshToken }, rememberMe);
   }
 
   return data;
