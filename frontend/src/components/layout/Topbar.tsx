@@ -7,20 +7,25 @@ import { useClickOutside } from '../../hooks/useClickOutside';
 interface TopbarProps {
   /** Optional right-aligned slot rendered before the icon cluster (e.g. page-specific actions). */
   actions?: ReactNode;
+  boardDate?: string;
 }
 
-export function Topbar({ actions }: TopbarProps) {
+export function Topbar({ actions ,boardDate }: TopbarProps) {
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   useClickOutside(menuRef, () => setMenuOpen(false));
+
+  const displayDate = boardDate 
+    ? new Date(boardDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+    : new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
   if (!user) return null;
 
   return (
     <header className="flex items-center gap-4 border-b border-white/5 bg-[#101a2e] px-6 py-3">
       <div className="hidden items-center gap-2 text-xs text-slate-500 md:flex">
-        <span>Workspace</span><span className="text-slate-700">/</span><CalendarDays className="h-3.5 w-3.5" /><span className="text-slate-300">20 Sep</span>
+        <span>Workspace</span><span className="text-slate-700">/</span><CalendarDays className="h-3.5 w-3.5" /><span className="text-slate-300"> {displayDate}</span>
       </div>
       <div className="relative w-full max-w-sm">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
