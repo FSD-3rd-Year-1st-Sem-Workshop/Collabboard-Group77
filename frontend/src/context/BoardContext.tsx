@@ -1,9 +1,5 @@
 import { createContext, useReducer, type ReactNode } from 'react';
 import type { Board, NewTaskInput, Task, TaskStatus } from '../types/index';
-import { mockBoards } from '../data/boards';
-import { mockTasks } from '../data/tasks';
-import { generateId } from '../utils/id';
-import { currentUser } from '../data/users';
 
 interface BoardState {
   boards: Board[];
@@ -19,8 +15,8 @@ type Action =
   | { type: 'ADD_BOARD'; name: string };
 
 const initialState: BoardState = {
-  boards: mockBoards,
-  tasks: mockTasks,
+  boards: [],
+  tasks: [],
 };
 
 function boardReducer(state: BoardState, action: Action): BoardState {
@@ -28,9 +24,9 @@ function boardReducer(state: BoardState, action: Action): BoardState {
     case 'ADD_TASK': {
       const now = new Date().toISOString();
       const newTask: Task = {
-        id: generateId('task'),
+        id: `task-${Date.now()}`,
         boardId: action.boardId,
-        createdById: currentUser.id,
+        createdById: "current-user-fallback",
         createdAt: now,
         updatedAt: now,
         ...action.input,
@@ -70,10 +66,10 @@ function boardReducer(state: BoardState, action: Action): BoardState {
     }
     case 'ADD_BOARD': {
       const newBoard: Board = {
-        id: generateId('board'),
+        id: `board-${Date.now()}`,
         name: action.name,
         starred: false,
-        memberIds: [currentUser.id],
+        memberIds: ["current-user-fallback"],
         coverColor: 'bg-slate-100',
       };
       return { ...state, boards: [...state.boards, newBoard] };

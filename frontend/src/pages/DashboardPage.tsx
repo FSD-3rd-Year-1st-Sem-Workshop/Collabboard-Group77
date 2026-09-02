@@ -16,6 +16,7 @@ const WORKSPACE_COLORS = [
   { label: 'Indigo', hex: '#4F46E5' },
   { label: 'Purple', hex: '#7C3AED' },
   { label: 'Pink', hex: '#DB2777' },
+  { label: 'Rose', hex: '#E11D48' },
   { label: 'Emerald', hex: '#059669' },
   { label: 'Amber', hex: '#D97706' },
 ];
@@ -179,7 +180,7 @@ export function DashboardPage() {
             {workspaces.map((workspace) => (
               <div
                 key={workspace.id}
-                onClick={() => navigate(`/boards/${workspace.id}`)}
+                onClick={() => navigate(`/workspaces/${workspace.id}`)}
                 className="group relative cursor-pointer rounded-2xl border border-white/10 bg-[#151f36] p-5 shadow-lg transition-all hover:-translate-y-1 hover:border-primary-400/50 hover:shadow-primary-950/40"
               >
                 <div
@@ -278,9 +279,8 @@ export function DashboardPage() {
                     type="button"
                     onClick={() => setSelectedColor(c.hex)}
                     style={{ backgroundColor: c.hex }}
-                    className={`h-7 w-7 rounded-full transition-transform ${
-                      selectedColor === c.hex ? 'ring-2 ring-white ring-offset-2 ring-offset-[#182541] scale-110' : 'opacity-80 hover:opacity-100'
-                    }`}
+                    className={`h-7 w-7 rounded-full transition-transform ${selectedColor === c.hex ? 'ring-2 ring-white ring-offset-2 ring-offset-[#182541] scale-110' : 'opacity-80 hover:opacity-100'
+                      }`}
                     title={c.label}
                   />
                 ))}
@@ -293,11 +293,10 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setVisibility('private')}
-                  className={`rounded-xl border p-3 text-left text-xs font-medium transition-all ${
-                    visibility === 'private'
-                      ? 'border-primary-500 bg-primary-500/10 text-primary-300'
-                      : 'border-white/10 bg-white/5 text-slate-400 hover:border-white/20'
-                  }`}
+                  className={`rounded-xl border p-3 text-left text-xs font-medium transition-all ${visibility === 'private'
+                    ? 'border-primary-500 bg-primary-500/10 text-primary-300'
+                    : 'border-white/10 bg-white/5 text-slate-400 hover:border-white/20'
+                    }`}
                 >
                   <div className="font-semibold text-slate-200">Private</div>
                   <div className="mt-0.5 text-[11px] text-slate-400">Only invited members can view</div>
@@ -305,11 +304,10 @@ export function DashboardPage() {
                 <button
                   type="button"
                   onClick={() => setVisibility('public')}
-                  className={`rounded-xl border p-3 text-left text-xs font-medium transition-all ${
-                    visibility === 'public'
-                      ? 'border-primary-500 bg-primary-500/10 text-primary-300'
-                      : 'border-white/10 bg-white/5 text-slate-400 hover:border-white/20'
-                  }`}
+                  className={`rounded-xl border p-3 text-left text-xs font-medium transition-all ${visibility === 'public'
+                    ? 'border-primary-500 bg-primary-500/10 text-primary-300'
+                    : 'border-white/10 bg-white/5 text-slate-400 hover:border-white/20'
+                    }`}
                 >
                   <div className="font-semibold text-slate-200">Public</div>
                   <div className="mt-0.5 text-[11px] text-slate-400">Visible to all workspace members</div>

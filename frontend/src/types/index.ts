@@ -51,8 +51,19 @@ export interface Workspace {
   role?: string;
   memberCount?: number;
   boardCount?: number;
+  ownerId?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface WorkspaceMember {
+  id: string;         // WorkspaceMember document _id
+  userId: string;
+  name: string;
+  email: string;
+  role: 'owner' | 'admin' | 'member';
+  status: 'active' | 'inactive';
+  joinedAt?: string;
 }
 
 export interface CreateWorkspaceInput {

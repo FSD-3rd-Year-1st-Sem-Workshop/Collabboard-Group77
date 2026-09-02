@@ -3,6 +3,7 @@ import { Star, Activity, Settings } from 'lucide-react';
 import { LoginPage } from '../pages/loginpage';
 import { RegisterPage } from '../pages/RegisterPage';
 import { DashboardPage } from '../pages/DashboardPage';
+import { WorkspacePage } from '../pages/WorkspacePage';
 import { BoardPage } from '../pages/BoardPage';
 import { ComingSoonPage } from '../pages/ComingSoonPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
@@ -29,7 +30,7 @@ export function AppRoutes() {
         path="/workspaces/:workspaceId"
         element={
           <ProtectedRoute>
-            <BoardPage />
+            <WorkspacePage />
           </ProtectedRoute>
         }
       />
