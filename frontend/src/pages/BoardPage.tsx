@@ -8,8 +8,10 @@ export function BoardPage() {
   const { boardId } = useParams<{ boardId: string }>();
   const navigate = useNavigate();
 
+  const tempDate = new Date().toISOString();
+
   return (
-    <DashboardShell>
+    <DashboardShell boardDate={tempDate}>
       <div className="flex h-full flex-col items-center justify-center gap-4 bg-[#0b1220] p-6">
         <EmptyState
           icon={Clock}

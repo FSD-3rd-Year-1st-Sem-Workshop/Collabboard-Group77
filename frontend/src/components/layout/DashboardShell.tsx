@@ -5,16 +5,17 @@ import { Topbar } from './Topbar';
 interface DashboardShellProps {
   children: ReactNode;
   topbarActions?: ReactNode;
+  boardDate?: string;
 }
 
 /** Two-column app shell (fixed sidebar + scrollable content) shared by every
  * authenticated page, so pages only need to render what's inside the frame. */
-export function DashboardShell({ children, topbarActions }: DashboardShellProps) {
+export function DashboardShell({ children, topbarActions, boardDate }: DashboardShellProps) {
   return (
     <div className="app-shell flex h-screen overflow-hidden bg-canvas">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar actions={topbarActions} />
+        <Topbar actions={topbarActions} boardDate={boardDate} />
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
     </div>
