@@ -7,7 +7,6 @@ import { Select } from '../common/Select';
 import { Button } from '../common/Button';
 import { Avatar } from '../common/Avatar';
 import { PriorityBadge } from './PriorityBadge';
-import { getUserById, mockUsers } from '../../data/users';
 import { formatDateTime, formatLongDate, toDateInputValue } from '../../utils/date';
 import { useBoards } from '../../hooks/useBoards';
 
@@ -20,9 +19,9 @@ interface TaskDetailsModalProps {
 
 export function TaskDetailsModal({ task, board, columns, onClose }: TaskDetailsModalProps) {
   const { updateTask, deleteTask } = useBoards();
-  const boardMembers = mockUsers.filter((user) => board.memberIds.includes(user.id));
-  const assignee = getUserById(task.assigneeId);
-  const createdBy = getUserById(task.createdById);
+  const boardMembers: any[] = [];
+  const assignee: any = null;
+  const createdBy: any = null;
 
   const [isEditing, setIsEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
