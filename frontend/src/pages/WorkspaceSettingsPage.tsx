@@ -4,15 +4,8 @@ import { ArrowLeft, Settings, Trash2, Mail, Users, Loader2 } from 'lucide-react'
 import { DashboardShell } from '../components/layout/DashboardShell';
 import { Button } from '../components/common/Button';
 import { useAuth } from '../hooks/useAuth';
-import {
-    getWorkspaceByIdApi,
-    updateWorkspaceApi,
-    deleteWorkspaceApi,
-    getInvitationsApi,
-    createInvitationApi,
-    deleteInvitationApi,
-    getWorkspaceMembersApi
-} from '../api/workspaces';
+import { getWorkspaceByIdApi, updateWorkspaceApi, deleteWorkspaceApi, getInvitationsApi, createInvitationApi,
+    deleteInvitationApi, getWorkspaceMembersApi } from '../api/workspaces';
 import type { Workspace, WorkspaceInvitation } from '../types';
 
 export function WorkspaceSettingsPage() {
@@ -220,7 +213,7 @@ export function WorkspaceSettingsPage() {
                                             className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 outline-none transition focus:border-primary-500/50 focus:bg-white/10"
                                         >
                                             <option value="private">Private</option>
-                                            <option value="public">Public</option>
+                    
                                         </select>
                                     </div>
 
@@ -278,14 +271,23 @@ export function WorkspaceSettingsPage() {
                                     </div>
                                     <div>
                                         <label className="block text-[10px] font-medium uppercase tracking-wider text-slate-500 mb-1">Role</label>
-                                        <select
-                                            value={inviteRole}
-                                            onChange={(e) => setInviteRole(e.target.value as any)}
-                                            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 outline-none transition focus:border-primary-500/50 focus:bg-white/10"
-                                        >
-                                            <option value="member">Member</option>
-                                            <option value="admin">Admin</option>
-                                        </select>
+                                        <div className="relative">
+                                    <select
+                                        value={inviteRole}
+                                        onChange={(e) => setInviteRole(e.target.value as any)}
+                                        className="
+                                            w-full appearance-none rounded-lg border border-white/10 bg-slate-900 px-3 py-2 pr-9
+                                            text-sm text-slate-200 outline-non transition-all cursor-pointer
+                                            hover:border-white/20 focus:border-primary-500/50 focus:bg-slate-800 focus:ring-2 focus:ring-primary-500/10">
+                                        <option value="member" className="bg-slate-900 text-slate-200">
+                                            Member
+                                        </option>
+                                        <option value="admin" className="bg-slate-900 text-slate-200">
+                                            Admin
+                                        </option>
+                                    </select>
+
+                                </div>
                                     </div>
                                     <Button type="submit" className="w-full" disabled={isSaving}>
                                         Send Invite

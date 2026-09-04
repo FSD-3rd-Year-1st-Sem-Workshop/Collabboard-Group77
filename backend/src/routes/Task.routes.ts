@@ -14,10 +14,14 @@ import {
     moveTaskValidator,
     assignTaskValidator
 } from "../validators/Task.validator.js";
+import { createComment, getTaskComments } from "../controllers/Comment.controller.js";
+import { createCommentValidator } from "../validators/Comment.validator.js";
 
 const router = express.Router();
 
 router.use(authenticate);
+
+// (existing routes remaining intact)
 
 // Get a single task
 router.get(
@@ -54,6 +58,22 @@ router.patch(
     assignTaskValidator,
     validateRequest,
     assignTask
+);
+
+//  Comments 
+router.post(
+    "/:taskId/comments",
+    requireTaskWorkspaceMember,
+    requireWorkspaceRole(["owner", "admin", "member"]),
+    createCommentValidator,
+    validateRequest,
+    createComment
+);
+
+router.get(
+    "/:taskId/comments",
+    requireTaskWorkspaceMember,
+    getTaskComments
 );
 
 export default router;

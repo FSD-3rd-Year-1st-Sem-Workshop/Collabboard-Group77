@@ -15,5 +15,6 @@ declare module "express-serve-static-core" {
     board?: any;
     column?: any;
     task?: any;
+    comment?: any;
   }
 }

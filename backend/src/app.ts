@@ -15,6 +15,7 @@ import invitationRoutes from "./routes/Invitation.routes.js";
 import boardRoutes from "./routes/Board.routes.js";
 import columnRoutes from "./routes/Column.routes.js";
 import taskRoutes from "./routes/Task.routes.js";
+import commentRoutes from "./routes/Comment.routes.js";
 import {
     notFoundHandler,
     errorHandler
@@ -70,6 +71,7 @@ app.use("/api/invitations", invitationRoutes);
 app.use("/api/boards", boardRoutes);
 app.use("/api/columns", columnRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/comments", commentRoutes);
 
 // Serve the raw OpenAPI spec as JSON so Scalar can load it
 const specPath = path.join(__dirname, "openapi.yaml");
