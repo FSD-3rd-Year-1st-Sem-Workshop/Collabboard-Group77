@@ -6,7 +6,7 @@ import User from "../models/User.js";
 import { sendSuccess } from "../utils/Response.js";
 import { AppError } from "../utils/AppError.js";
 
-/* Send an invitation to join the workspace.*/
+/* Send an invitation to an existing user to join the workspace. */
 export async function sendInvitation(
     req: Request,
     res: Response,
@@ -14,47 +14,68 @@ export async function sendInvitation(
 ): Promise<Response | void> {
     try {
         const workspaceId = req.workspace?._id || req.params.workspaceId;
-        const { email, role } = req.body;
+        const email = req.body.email?.trim().toLowerCase();
+        const role = req.body.role || "member";
 
         if (!email) {
             throw new AppError("Email is required", 400);
         }
 
-        // Check if the user is already a member of the workspace
-        const targetUser = await User.findOne({ email: email.toLowerCase() });
-        if (targetUser) {
-            const isMember = await WorkspaceMember.findOne({
-                workspace: workspaceId,
-                user: targetUser._id,
-                status: "active",
-            });
+        // 1. Check whether the email belongs to an existing user
+        const targetUser = await User.findOne({
+            email,
+            status: "active",
+        });
 
-            if (isMember) {
-                throw new AppError("User is already a member of this workspace", 400);
-            }
+        if (!targetUser) {
+            throw new AppError(
+                "No registered user was found with this email address",
+                404
+            );
         }
 
-        // Check if a pending active invitation already exists to this email in this workspace
+        // 2. Check if the user is already a member
+        const isMember = await WorkspaceMember.findOne({
+            workspace: workspaceId,
+            user: targetUser._id,
+            status: "active",
+        });
+
+        if (isMember) {
+            throw new AppError(
+                "User is already a member of this workspace",
+                400
+            );
+        }
+
+        // 3. Check whether a pending invitation already exists
         const existingInvitation = await WorkspaceInvitation.findOne({
             workspace: workspaceId,
-            email: email.toLowerCase(),
+            email,
             status: "pending",
             expiresAt: { $gt: new Date() },
         });
 
         if (existingInvitation) {
-            throw new AppError("An active invitation is already pending for this email in this workspace", 400);
+            throw new AppError(
+                "An active invitation is already pending for this email in this workspace",
+                400
+            );
         }
 
-        // Generate secure random token
+        // 4. Generate secure invitation token
         const token = crypto.randomBytes(32).toString("hex");
-        // Default expiration is 7 days
-        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
+        // 5. Invitation expires after 7 days
+        const expiresAt = new Date(
+            Date.now() + 7 * 24 * 60 * 60 * 1000
+        );
+
+        // 6. Create invitation
         const invitation = new WorkspaceInvitation({
             workspace: workspaceId,
-            email: email.toLowerCase(),
-            role: role || "member",
+            email,
+            role,
             invitedBy: req.userId,
             token,
             expiresAt,
@@ -62,12 +83,17 @@ export async function sendInvitation(
 
         await invitation.save();
 
-        return sendSuccess(res, invitation, 201, "Invitation sent successfully");
+        // 7. Send invitation email here
+        // await sendInvitationEmail(...)
+
+        return sendSuccess(
+            res, invitation, 201,
+            "Invitation sent successfully"
+        );
     } catch (error) {
         next(error);
     }
 }
-
 /* List all invitations for a workspace.*/
 export async function listWorkspaceInvitations(
     req: Request,
