@@ -103,3 +103,43 @@ export async function requireTaskWorkspaceMember(
         next(error);
     }
 }
+
+import Comment from "../models/Comment.js";
+
+/* Middleware to ensure the user is an active member of the workspace the comment belongs to.
+ */
+export async function requireCommentWorkspaceMember(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> {
+    try {
+        const commentId = req.params.commentId || req.params.id;
+
+        if (!commentId) {
+            throw new AppError("Comment ID is required", 400);
+        }
+
+        const comment = await Comment.findById(commentId).populate({
+            path: "task",
+            populate: { path: "board" },
+        });
+
+        if (!comment) {
+            throw new AppError("Comment not found", 404);
+        }
+
+        if (!comment.task || !(comment.task as any).board) {
+            throw new AppError("Orphaned comment has no associated task or board", 500);
+        }
+
+        req.comment = comment;
+        req.task = comment.task; // attached for convenience
+        // @ts-ignore
+        req.resolvedWorkspaceId = comment.task.board.workspace.toString();
+
+        return requireWorkspaceMember(req, res, next) as unknown as void;
+    } catch (error) {
+        next(error);
+    }
+}
