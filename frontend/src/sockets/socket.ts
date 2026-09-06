@@ -32,10 +32,14 @@ export interface WorkspaceMemberEvent {
 export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(SOCKET_URL, {
     autoConnect: false,
     withCredentials: true,
-    auth: (cb) => cb({ token: getAccessToken() }),
 });
 
 export function connectSocket(): void {
-    socket.auth = { token: getAccessToken() };
-    if (!socket.connected) socket.connect();
+    const token = getAccessToken();
+    if (token) {
+        socket.auth = { token };
+        if (!socket.connected) socket.connect();
+    } else {
+        if (socket.connected) socket.disconnect();
+    }
 }

@@ -16,8 +16,15 @@ export function useSocket(boardId?: string, workspaceId?: string) {
 
         socket.on('connect', joinRooms);
 
+        const handleSocketError = (err: any) => console.error('Socket Error:', err);
+        socket.on('connect_error', handleSocketError);
+        socket.on('socket.error', handleSocketError);
+
         return () => {
             socket.off('connect', joinRooms);
+            socket.off('connect_error', handleSocketError);
+            socket.off('socket.error', handleSocketError);
+
             if (boardId && socket.connected) {
                 socket.emit('board.leave', { boardId });
             }
