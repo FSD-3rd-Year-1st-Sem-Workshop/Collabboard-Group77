@@ -8,8 +8,8 @@ import { getBoardColumns, createColumn, deleteColumn, type ApiColumn } from '../
 import { getBoardTasks, createTask, moveTask, type ApiTask } from '../api/tasks';
 import { getWorkspaceMembersApi } from '../api/workspaces';
 import { useAuth } from '../hooks/useAuth';
+import { useSocket } from '../hooks/useSocket';
 import type { WorkspaceMember } from '../types';
-import { connectSocket, socket } from '../sockets/socket';
 
 export function BoardPage() {
   const { boardId } = useParams<{ boardId: string }>();
@@ -20,7 +20,7 @@ export function BoardPage() {
   const [columns, setColumns] = useState<ApiColumn[]>([]);
   const [tasks, setTasks] = useState<ApiTask[]>([]);
   const [members, setMembers] = useState<WorkspaceMember[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingBoard, setLoadingBoard] = useState(true);
   const [error, setError] = useState('');
 
   const [selectedTask, setSelectedTask] = useState<ApiTask | null>(null);
@@ -34,10 +34,12 @@ export function BoardPage() {
   const myMember = members.find((m) => m.userId === user?.id);
   const isAdminOrOwner = myMember?.role === 'owner' || myMember?.role === 'admin';
 
+  const socket = useSocket(boardId);
+
   useEffect(() => {
     if (!boardId) return;
     async function load() {
-      setLoading(true);
+      setLoadingBoard(true);
       try {
         const boardData = await getBoardById(boardId!);
         setBoard(boardData);
@@ -52,60 +54,61 @@ export function BoardPage() {
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to load board');
       } finally {
-        setLoading(false);
+        setLoadingBoard(false);
       }
     }
     load();
   }, [boardId]);
 
   useEffect(() => {
-    if (!boardId) return;
+    if (!socket || !boardId) return;
 
-    const joinBoard = () => socket.emit('board.join', { boardId });
-    const shouldApply = (incoming: ApiTask, current: ApiTask) => incoming.version >= current.version;
-    const handleCreated = ({ task }: { task: ApiTask }) => {
+    const handleTaskCreated = ({ task }: { task: ApiTask }) => {
       if (task.board !== boardId) return;
       setTasks((prev) => {
-        const existing = prev.find((current) => current._id === task._id);
-        return existing ? prev.map((current) => current._id === task._id && shouldApply(task, current) ? task : current) : [...prev, task];
+        if (prev.some((t) => t._id === task._id)) return prev;
+        return [...prev, task].sort((a, b) => a.position - b.position);
       });
     };
-    const handleUpdated = ({ task }: { task: ApiTask }) => {
-      if (task.board !== boardId) return;
-      setTasks((prev) => prev.map((current) => current._id === task._id && shouldApply(task, current) ? task : current));
-      setSelectedTask((current) => current?._id === task._id && shouldApply(task, current) ? task : current);
-    };
-    const handleDeleted = ({ taskId, boardId: eventBoardId }: { taskId: string; boardId: string }) => {
-      if (eventBoardId !== boardId) return;
-      setTasks((prev) => prev.filter((task) => task._id !== taskId));
-      setSelectedTask((current) => current?._id === taskId ? null : current);
-    };
-    const handleSocketError = ({ message }: { message: string }) => console.error('Socket error:', message);
 
-    connectSocket();
-    joinBoard();
-    socket.on('connect', joinBoard);
-    socket.on('task.created', handleCreated);
-    socket.on('task.updated', handleUpdated);
-    socket.on('task.moved', handleUpdated);
-    socket.on('task.deleted', handleDeleted);
-    socket.on('socket.error', handleSocketError);
+    const handleTaskUpdated = ({ task }: { task: ApiTask }) => {
+      if (task.board !== boardId) return;
+      setTasks((prev) => prev.map((t) => (t._id === task._id ? task : t)).sort((a, b) => a.position - b.position));
+      setSelectedTask((prevTask) => prevTask?._id === task._id ? task : prevTask);
+    };
+
+    const handleTaskMoved = ({ task }: { task: ApiTask }) => {
+      if (task.board !== boardId) return;
+      setTasks((prev) => prev.map((t) => (t._id === task._id ? task : t)).sort((a, b) => a.position - b.position));
+      setSelectedTask((prevTask) => prevTask?._id === task._id ? task : prevTask);
+    };
+
+    const handleTaskDeleted = ({ taskId, boardId: eventBoardId }: { taskId: string; boardId: string }) => {
+      if (typeof eventBoardId === 'string' && eventBoardId !== boardId) return;
+      setTasks((prev) => prev.filter((t) => t._id !== taskId));
+      setSelectedTask((prev) => prev?._id === taskId ? null : prev);
+    };
+
+    socket.on('task.created', handleTaskCreated);
+    socket.on('task.updated', handleTaskUpdated);
+    socket.on('task.moved', handleTaskMoved);
+    socket.on('task.deleted', handleTaskDeleted);
 
     return () => {
-      socket.emit('board.leave', { boardId });
-      socket.off('connect', joinBoard);
-      socket.off('task.created', handleCreated);
-      socket.off('task.updated', handleUpdated);
-      socket.off('task.moved', handleUpdated);
-      socket.off('task.deleted', handleDeleted);
-      socket.off('socket.error', handleSocketError);
+      socket.off('task.created', handleTaskCreated);
+      socket.off('task.updated', handleTaskUpdated);
+      socket.off('task.moved', handleTaskMoved);
+      socket.off('task.deleted', handleTaskDeleted);
     };
-  }, [boardId]);
+  }, [socket, boardId]);
 
   const handleAddTask = useCallback(async (columnId: string, title: string) => {
     if (!boardId) return;
     const task = await createTask(boardId, columnId, { title });
-    setTasks((prev) => [...prev, task]);
+    setTasks((prev) => {
+      if (prev.some((t) => t._id === task._id)) return prev;
+      return [...prev, task].sort((a, b) => a.position - b.position);
+    });
   }, [boardId]);
 
   const handleDrop = useCallback(async (targetColumnId: string) => {
@@ -167,7 +170,7 @@ export function BoardPage() {
     color: '#e2e8f0', fontSize: 13, padding: '8px 12px', outline: 'none', boxSizing: 'border-box',
   };
 
-  if (loading) {
+  if (loadingBoard) {
     return (
       <DashboardShell>
         <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', background: '#090f1e' }}>
