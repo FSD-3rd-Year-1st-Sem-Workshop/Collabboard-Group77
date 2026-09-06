@@ -14,7 +14,6 @@ const navItems = [
   { to: '/starred', label: 'Starred', icon: Star },
   { to: '/activity', label: 'Activity', icon: Activity },
   { to: '/profile', label: 'Edit Profile', icon: UserRoundPen },
-  { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
 export function Sidebar() {

@@ -3,6 +3,9 @@ import type { Server, Socket } from "socket.io";
 import type { ITask } from "../models/Task.js";
 
 export interface ServerToClientEvents {
+    "column.created": (payload: { column: import("../models/Column.js").IColumn }) => void;
+    "column.updated": (payload: { column: import("../models/Column.js").IColumn }) => void;
+    "column.deleted": (payload: { columnId: string; boardId: string }) => void;
     "task.created": (payload: { task: ITask }) => void;
     "task.updated": (payload: { task: ITask }) => void;
     "task.moved": (payload: { task: ITask }) => void;
@@ -20,7 +23,7 @@ export interface ClientToServerEvents {
     "board.leave": (payload: { boardId: string }) => void;
 }
 
-export interface InterServerEvents {}
+export interface InterServerEvents { }
 
 export interface SocketData {
     userId: string;

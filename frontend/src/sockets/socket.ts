@@ -5,6 +5,9 @@ const SOCKET_URL =
     import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:5000';
 
 export type ServerToClientEvents = {
+    'column.created': (payload: { column: import('../api/columns').ApiColumn }) => void;
+    'column.updated': (payload: { column: import('../api/columns').ApiColumn }) => void;
+    'column.deleted': (payload: { columnId: string; boardId: string }) => void;
     'task.created': (payload: { task: import('../api/tasks').ApiTask }) => void;
     'task.updated': (payload: { task: import('../api/tasks').ApiTask }) => void;
     'task.moved': (payload: { task: import('../api/tasks').ApiTask }) => void;
@@ -32,10 +35,14 @@ export interface WorkspaceMemberEvent {
 export const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(SOCKET_URL, {
     autoConnect: false,
     withCredentials: true,
-    auth: (cb) => cb({ token: getAccessToken() }),
 });
 
 export function connectSocket(): void {
-    socket.auth = { token: getAccessToken() };
-    if (!socket.connected) socket.connect();
+    const token = getAccessToken();
+    if (token) {
+        socket.auth = { token };
+        if (!socket.connected) socket.connect();
+    } else {
+        if (socket.connected) socket.disconnect();
+    }
 }

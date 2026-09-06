@@ -3,6 +3,7 @@ import Column from "../models/Column.js";
 import Task from "../models/Task.js";
 import { AppError } from "../utils/AppError.js";
 import { sendSuccess } from "../utils/Response.js";
+import { getIO } from "../socket/index.js";
 
 // GET /api/boards/:boardId/columns
 export async function listBoardColumns(
@@ -45,6 +46,7 @@ export async function createColumn(
             position: newPosition
         });
 
+        getIO().to(`board:${boardId}`).emit("column.created", { column });
         return sendSuccess(res, column, 201, "Column created successfully");
     } catch (error) {
         if (error instanceof Error && error.message.includes("E11000")) {
@@ -73,6 +75,7 @@ export async function updateColumn(
 
         await column.save();
 
+        getIO().to(`board:${column.board.toString()}`).emit("column.updated", { column });
         return sendSuccess(res, column, 200, "Column updated successfully");
     } catch (error) {
         if (error instanceof Error && error.message.includes("E11000")) {
@@ -141,6 +144,7 @@ export async function archiveColumn(
         column.status = "archived";
         await column.save();
 
+        getIO().to(`board:${column.board.toString()}`).emit("column.deleted", { columnId: column._id.toString(), boardId: column.board.toString() });
         return sendSuccess(res, null, 200, "Column archived successfully");
     } catch (error) {
         next(error);
