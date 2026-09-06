@@ -89,16 +89,41 @@ export function BoardPage() {
       setSelectedTask((prev) => prev?._id === taskId ? null : prev);
     };
 
+    const handleColumnCreated = ({ column }: { column: ApiColumn }) => {
+      if (column.board !== boardId) return;
+      setColumns((prev) => {
+        if (prev.some((c) => c._id === column._id)) return prev;
+        return [...prev, column].sort((a, b) => a.position - b.position);
+      });
+    };
+
+    const handleColumnUpdated = ({ column }: { column: ApiColumn }) => {
+      if (column.board !== boardId) return;
+      setColumns((prev) => prev.map((c) => (c._id === column._id ? column : c)).sort((a, b) => a.position - b.position));
+    };
+
+    const handleColumnDeleted = ({ columnId, boardId: eventBoardId }: { columnId: string; boardId: string }) => {
+      if (typeof eventBoardId === 'string' && eventBoardId !== boardId) return;
+      setColumns((prev) => prev.filter((c) => c._id !== columnId));
+      setTasks((prev) => prev.filter((t) => t.column !== columnId));
+    };
+
     socket.on('task.created', handleTaskCreated);
     socket.on('task.updated', handleTaskUpdated);
     socket.on('task.moved', handleTaskMoved);
     socket.on('task.deleted', handleTaskDeleted);
+    socket.on('column.created', handleColumnCreated);
+    socket.on('column.updated', handleColumnUpdated);
+    socket.on('column.deleted', handleColumnDeleted);
 
     return () => {
       socket.off('task.created', handleTaskCreated);
       socket.off('task.updated', handleTaskUpdated);
       socket.off('task.moved', handleTaskMoved);
       socket.off('task.deleted', handleTaskDeleted);
+      socket.off('column.created', handleColumnCreated);
+      socket.off('column.updated', handleColumnUpdated);
+      socket.off('column.deleted', handleColumnDeleted);
     };
   }, [socket, boardId]);
 
@@ -145,7 +170,10 @@ export function BoardPage() {
     setSavingCol(true);
     try {
       const col = await createColumn(boardId, { name: newColName.trim() });
-      setColumns((prev) => [...prev, col]);
+      setColumns((prev) => {
+        if (prev.some((c) => c._id === col._id)) return prev;
+        return [...prev, col].sort((a, b) => a.position - b.position);
+      });
       setNewColName('');
       setAddingColumn(false);
     } catch (e) {

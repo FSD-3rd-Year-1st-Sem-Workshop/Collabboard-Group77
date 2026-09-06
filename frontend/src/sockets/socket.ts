@@ -5,6 +5,9 @@ const SOCKET_URL =
     import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:5000';
 
 export type ServerToClientEvents = {
+    'column.created': (payload: { column: import('../api/columns').ApiColumn }) => void;
+    'column.updated': (payload: { column: import('../api/columns').ApiColumn }) => void;
+    'column.deleted': (payload: { columnId: string; boardId: string }) => void;
     'task.created': (payload: { task: import('../api/tasks').ApiTask }) => void;
     'task.updated': (payload: { task: import('../api/tasks').ApiTask }) => void;
     'task.moved': (payload: { task: import('../api/tasks').ApiTask }) => void;
