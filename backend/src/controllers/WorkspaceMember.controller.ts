@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import WorkspaceMember from "../models/Workspace_members.js";
 import { sendSuccess } from "../utils/Response.js";
 import { AppError } from "../utils/AppError.js";
+import { getIO } from "../socket/index.js";
 
 /* List all active members of the workspace.*/
 export async function getWorkspaceMembers(
@@ -23,13 +24,15 @@ export async function getWorkspaceMembers(
         const formattedMembers = members.map((member: any) => {
             const userObj = member.user || {};
             return {
+                id: member._id.toString(),
                 userId: userObj._id,
                 name: userObj.fullName || "",
                 email: userObj.email || "",
                 avatar: userObj.avatar || null,
                 bio: userObj.bio || "",
                 role: member.role,
-                status: member.status
+                status: member.status,
+                joinedAt: member.joinedAt
             };
         });
 
@@ -87,12 +90,23 @@ export async function updateMemberRole(
         targetMember.role = role;
         await targetMember.save();
 
+        const targetUserId = targetMember.user?.toString();
+        if (!targetUserId) {
+            throw new AppError("Workspace member has no user", 500);
+        }
+
         const responseData = {
             userId: targetMember.user,
             role: targetMember.role,
             status: targetMember.status
         };
 
+        getIO().to(`workspace:${workspaceId}`).emit("workspace.member_role_updated", {
+            workspaceId: workspaceId.toString(),
+            userId: targetUserId,
+            role: String(targetMember.role),
+            status: String(targetMember.status)
+        });
         return sendSuccess(res, responseData, 200, "Member role updated successfully");
     } catch (error) {
         next(error);
@@ -158,6 +172,11 @@ export async function removeMember(
 
         // Delete the member record
         await WorkspaceMember.deleteOne({ _id: targetMember._id });
+
+        getIO().to(`workspace:${workspaceId}`).emit("workspace.member_removed", {
+            userId,
+            workspaceId: workspaceId.toString()
+        });
 
         return sendSuccess(
             res,

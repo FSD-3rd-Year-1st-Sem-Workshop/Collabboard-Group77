@@ -79,7 +79,7 @@ export async function deleteWorkspaceApi(id: string): Promise<void> {
   if (!response.ok) throw new Error(data?.message || 'Failed to delete workspace.');
 }
 
-export async function createInvitationApi(workspaceId: string, email: string, role: string): Promise<any> {
+export async function createInvitationApi(workspaceId: string, email: string, role: string): Promise<string> {
   const response = await authFetchWithRefresh(`${API_BASE_URL}/api/workspaces/${workspaceId}/invitations`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -90,7 +90,7 @@ export async function createInvitationApi(workspaceId: string, email: string, ro
   return data?.data;
 }
 
-export async function getInvitationsApi(workspaceId: string): Promise<any[]> {
+export async function getInvitationsApi(workspaceId: string): Promise<string[]> {
   const response = await authFetchWithRefresh(`${API_BASE_URL}/api/workspaces/${workspaceId}/invitations`, {
     method: 'GET'
   });

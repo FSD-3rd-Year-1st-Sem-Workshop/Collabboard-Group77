@@ -7,7 +7,7 @@ export interface ApiBoard {
     name: string;
     description?: string;
     color?: string;
-    visibility: 'public' | 'private';
+    visibility: 'workspace' | 'public' | 'private';
     status: 'active' | 'archived';
     workspace: string;
     createdBy: string;
@@ -19,7 +19,7 @@ export interface CreateBoardInput {
     name: string;
     description?: string;
     color?: string;
-    visibility?: 'public' | 'private';
+    visibility?: 'workspace' | 'public' | 'private';
 }
 
 async function req<T>(url: string, opts?: RequestInit): Promise<T> {
@@ -36,11 +36,11 @@ export const getBoardById = (boardId: string) =>
     req<ApiBoard>(`${API}/api/boards/${boardId}`);
 
 export const createBoard = (workspaceId: string, payload: CreateBoardInput) =>
-    req<ApiBoard>(`${API}/api/workspaces/${workspaceId}/boards`, {
+    req<ApiBoard | { board: ApiBoard; columns: unknown[] }>(`${API}/api/workspaces/${workspaceId}/boards`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-    });
+    }).then((result) => 'board' in result ? result.board : result);
 
 export const deleteBoard = (boardId: string) =>
     req<void>(`${API}/api/boards/${boardId}`, { method: 'DELETE' });

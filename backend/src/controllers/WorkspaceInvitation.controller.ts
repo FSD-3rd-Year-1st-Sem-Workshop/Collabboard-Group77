@@ -5,6 +5,7 @@ import WorkspaceInvitation from "../models/WorkspaceInvitation.js";
 import User from "../models/User.js";
 import { sendSuccess } from "../utils/Response.js";
 import { AppError } from "../utils/AppError.js";
+import { getIO } from "../socket/index.js";
 
 /* Send an invitation to an existing user to join the workspace. */
 export async function sendInvitation(
@@ -204,6 +205,11 @@ export async function acceptInvitation(
             throw new AppError("Access denied: This invitation was sent to a different email address", 403);
         }
 
+        const workspaceId = invitation.workspace?.toString();
+        if (!workspaceId) {
+            throw new AppError("Invitation has no workspace", 500);
+        }
+
         // Verify user is not already a member (failsafe check)
         const isMember = await WorkspaceMember.findOne({
             workspace: invitation.workspace,
@@ -231,6 +237,13 @@ export async function acceptInvitation(
         // Mark invitation as accepted
         invitation.status = "accepted";
         await invitation.save();
+
+        getIO().to(`workspace:${workspaceId}`).emit("workspace.member_added", {
+            workspaceId,
+            userId: currentUserId,
+            role: String(member.role),
+            status: String(member.status)
+        });
 
         return sendSuccess(res, member, 200, "Invitation accepted successfully. Welcome to the workspace!");
     } catch (error) {
