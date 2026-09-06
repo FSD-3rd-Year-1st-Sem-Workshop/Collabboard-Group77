@@ -9,6 +9,7 @@ import { getBoardTasks, createTask, moveTask, type ApiTask } from '../api/tasks'
 import { getWorkspaceMembersApi } from '../api/workspaces';
 import { useAuth } from '../hooks/useAuth';
 import type { WorkspaceMember } from '../types';
+import { connectSocket, socket } from '../sockets/socket';
 
 export function BoardPage() {
   const { boardId } = useParams<{ boardId: string }>();
@@ -55,6 +56,50 @@ export function BoardPage() {
       }
     }
     load();
+  }, [boardId]);
+
+  useEffect(() => {
+    if (!boardId) return;
+
+    const joinBoard = () => socket.emit('board.join', { boardId });
+    const shouldApply = (incoming: ApiTask, current: ApiTask) => incoming.version >= current.version;
+    const handleCreated = ({ task }: { task: ApiTask }) => {
+      if (task.board !== boardId) return;
+      setTasks((prev) => {
+        const existing = prev.find((current) => current._id === task._id);
+        return existing ? prev.map((current) => current._id === task._id && shouldApply(task, current) ? task : current) : [...prev, task];
+      });
+    };
+    const handleUpdated = ({ task }: { task: ApiTask }) => {
+      if (task.board !== boardId) return;
+      setTasks((prev) => prev.map((current) => current._id === task._id && shouldApply(task, current) ? task : current));
+      setSelectedTask((current) => current?._id === task._id && shouldApply(task, current) ? task : current);
+    };
+    const handleDeleted = ({ taskId, boardId: eventBoardId }: { taskId: string; boardId: string }) => {
+      if (eventBoardId !== boardId) return;
+      setTasks((prev) => prev.filter((task) => task._id !== taskId));
+      setSelectedTask((current) => current?._id === taskId ? null : current);
+    };
+    const handleSocketError = ({ message }: { message: string }) => console.error('Socket error:', message);
+
+    connectSocket();
+    joinBoard();
+    socket.on('connect', joinBoard);
+    socket.on('task.created', handleCreated);
+    socket.on('task.updated', handleUpdated);
+    socket.on('task.moved', handleUpdated);
+    socket.on('task.deleted', handleDeleted);
+    socket.on('socket.error', handleSocketError);
+
+    return () => {
+      socket.emit('board.leave', { boardId });
+      socket.off('connect', joinBoard);
+      socket.off('task.created', handleCreated);
+      socket.off('task.updated', handleUpdated);
+      socket.off('task.moved', handleUpdated);
+      socket.off('task.deleted', handleDeleted);
+      socket.off('socket.error', handleSocketError);
+    };
   }, [boardId]);
 
   const handleAddTask = useCallback(async (columnId: string, title: string) => {

@@ -7,7 +7,8 @@ import {
     getTaskById,
     updateTask,
     moveTask,
-    assignTask
+    assignTask,
+    deleteTask
 } from "../controllers/Task.controller.js";
 import {
     updateTaskValidator,
@@ -38,6 +39,13 @@ router.patch(
     updateTaskValidator,
     validateRequest,
     updateTask
+);
+
+router.delete(
+    "/:taskId",
+    requireTaskWorkspaceMember,
+    requireWorkspaceRole(["owner", "admin"]),
+    deleteTask
 );
 
 // Move task

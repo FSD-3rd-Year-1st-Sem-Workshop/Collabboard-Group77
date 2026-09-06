@@ -2,8 +2,6 @@
 
 import { CalendarDays } from 'lucide-react';
 import type { Task } from '../../types/index';
-import { Avatar } from '../common/Avatar';
-// import { getUserById } from '../../data/users';
 import { formatShortDate } from '../../utils/date';
 import { cn } from '../../utils/cn';
 
@@ -15,7 +13,6 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, onOpen, onDragStart, isDragging }: TaskCardProps) {
-  const assignee = getUserById(task.assigneeId);
   const dueLabel = formatShortDate(task.dueDate);
 
   return (
@@ -40,7 +37,6 @@ export function TaskCard({ task, onOpen, onDragStart, isDragging }: TaskCardProp
         ) : (
           <span />
         )}
-        {assignee && <Avatar user={assignee} size="sm" />}
       </div>
     </button>
   );
