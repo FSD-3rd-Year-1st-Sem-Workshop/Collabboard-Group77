@@ -3,6 +3,7 @@ import Task from "../models/Task.js";
 import Column from "../models/Column.js";
 import { AppError } from "../utils/AppError.js";
 import { sendSuccess } from "../utils/Response.js";
+import { getIO } from "../socket/index.js";
 
 // GET /api/boards/:boardId/tasks
 export async function listBoardTasks(
@@ -32,7 +33,8 @@ export async function createTask(
 ): Promise<Response | void> {
     try {
         const boardId = req.params.boardId as string;
-        const { columnId, title, description, priority } = req.body;
+        const { title, description, priority } = req.body;
+        const columnId = req.body.columnId || req.params.columnId;
 
         // Verify column exists on this board
         const column = await Column.findOne({ _id: columnId, board: boardId });
@@ -55,6 +57,7 @@ export async function createTask(
             version: 1
         });
 
+        getIO().to(`board:${boardId}`).emit("task.created", { task });
         return sendSuccess(res, task, 201, "Task created successfully");
     } catch (error) {
         next(error);
@@ -103,6 +106,7 @@ export async function updateTask(
 
         await task.save();
 
+        getIO().to(`board:${task.board.toString()}`).emit("task.updated", { task });
         return sendSuccess(res, task, 200, "Task updated successfully");
     } catch (error) {
         next(error);
@@ -142,6 +146,7 @@ export async function moveTask(
 
         await task.save();
 
+        getIO().to(`board:${task.board.toString()}`).emit("task.moved", { task });
         return sendSuccess(res, task, 200, "Task moved successfully");
     } catch (error) {
         next(error);
@@ -167,7 +172,35 @@ export async function assignTask(
 
         await task.save();
 
+        getIO().to(`board:${task.board.toString()}`).emit("task.updated", { task });
         return sendSuccess(res, task, 200, "Task assignments updated successfully");
+    } catch (error) {
+        next(error);
+    }
+}
+
+export async function deleteTask(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<Response | void> {
+    try {
+        const task = req.task;
+
+        if (task.archived) {
+            throw new AppError("Task is already archived", 400);
+        }
+
+        task.archived = true;
+        task.archivedAt = new Date();
+        task.version = Number(task.version) + 1;
+        await task.save();
+
+        getIO().to(`board:${task.board.toString()}`).emit("task.deleted", {
+            taskId: task._id.toString(),
+            boardId: task.board.toString()
+        });
+        return sendSuccess(res, null, 200, "Task deleted successfully");
     } catch (error) {
         next(error);
     }

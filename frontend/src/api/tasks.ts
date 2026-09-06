@@ -44,7 +44,7 @@ export const createTask = (boardId: string, columnId: string, payload: CreateTas
     req<ApiTask>(`${API}/api/boards/${boardId}/columns/${columnId}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...payload, columnId }),
     });
 
 export const updateTask = (taskId: string, payload: Partial<CreateTaskInput>) =>

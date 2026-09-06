@@ -1,14 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {ArrowLeft,LayoutGrid,Plus, Settings, Users, FolderKanban, Loader2, MoreHorizontal, ShieldCheck, Crown, User as UserIcon,
     Trash2, } from 'lucide-react';
 import { DashboardShell } from '../components/layout/DashboardShell';
 import { Button } from '../components/common/Button';
 import { EmptyState } from '../components/common/EmptyState';
+import { Input } from '../components/common/input';
+import { Modal } from '../components/common/Modal';
 import { useAuth } from '../hooks/useAuth';
 import { getWorkspaceByIdApi, getWorkspaceMembersApi, updateMemberRoleApi, removeMemberApi,
 } from '../api/workspaces';
+import { createBoard, getWorkspaceBoards, type ApiBoard } from '../api/boards';
 import type { Workspace, WorkspaceMember } from '../types';
+import { connectSocket, socket, type WorkspaceMemberEvent } from '../sockets/socket';
 
 function getInitials(name: string) {
     return name
@@ -31,6 +35,14 @@ const ROLE_ICONS = {
     member: UserIcon,
 };
 
+const BOARD_COLORS = [
+    { label: 'Blue', hex: '#2563EB' },
+    { label: 'Indigo', hex: '#4F46E5' },
+    { label: 'Emerald', hex: '#059669' },
+    { label: 'Amber', hex: '#D97706' },
+    { label: 'Rose', hex: '#E11D48' },
+];
+
 export function WorkspacePage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
     const navigate = useNavigate();
@@ -38,10 +50,18 @@ export function WorkspacePage() {
 
     const [workspace, setWorkspace] = useState<Workspace | null>(null);
     const [members, setMembers] = useState<WorkspaceMember[]>([]);
+    const [boards, setBoards] = useState<ApiBoard[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [isCreatingBoard, setIsCreatingBoard] = useState(false);
+    const [boardName, setBoardName] = useState('');
+    const [boardDescription, setBoardDescription] = useState('');
+    const [boardColor, setBoardColor] = useState('#2563EB');
+    const [boardVisibility, setBoardVisibility] = useState<'workspace' | 'private' | 'public'>('workspace');
+    const [boardFormError, setBoardFormError] = useState('');
+    const [isCreatingBoardRequest, setIsCreatingBoardRequest] = useState(false);
 
     // active user's role inside this workspace
     const myMember = members.find((m) => m.userId === user?.id);
@@ -54,12 +74,14 @@ export function WorkspacePage() {
             setIsLoading(true);
             setError('');
             try {
-                const [ws, mems] = await Promise.all([
+                const [ws, mems, boardList] = await Promise.all([
                     getWorkspaceByIdApi(workspaceId!),
                     getWorkspaceMembersApi(workspaceId!),
+                    getWorkspaceBoards(workspaceId!),
                 ]);
                 setWorkspace(ws);
                 setMembers(mems);
+                setBoards(boardList);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to load workspace.');
             } finally {
@@ -68,6 +90,72 @@ export function WorkspacePage() {
         }
 
         load();
+    }, [workspaceId]);
+
+    async function handleCreateBoard(event: FormEvent) {
+        event.preventDefault();
+        if (!workspaceId || !boardName.trim()) {
+            setBoardFormError('Board name is required.');
+            return;
+        }
+        setIsCreatingBoardRequest(true);
+        setBoardFormError('');
+        try {
+            const created = await createBoard(workspaceId, {
+                name: boardName.trim(),
+                description: boardDescription.trim(),
+                color: boardColor,
+                visibility: boardVisibility,
+            });
+            setBoards((prev) => [created, ...prev]);
+            setBoardName('');
+            setBoardDescription('');
+            setBoardColor('#2563EB');
+            setBoardVisibility('workspace');
+            setIsCreatingBoard(false);
+        } catch (err) {
+            setBoardFormError(err instanceof Error ? err.message : 'Failed to create board.');
+        } finally {
+            setIsCreatingBoardRequest(false);
+        }
+    }
+
+    useEffect(() => {
+        if (!workspaceId) return;
+
+        const joinWorkspace = () => socket.emit('workspace.join', { workspaceId });
+        const handleRoleUpdated = (event: WorkspaceMemberEvent) => {
+            if (event.workspaceId !== workspaceId) return;
+            setMembers((prev) => prev.map((member) => member.userId === event.userId
+                ? { ...member, role: event.role as WorkspaceMember['role'], status: event.status as WorkspaceMember['status'] }
+                : member));
+        };
+        const handleRemoved = ({ userId, workspaceId: eventWorkspaceId }: { userId: string; workspaceId: string }) => {
+            if (eventWorkspaceId !== workspaceId) return;
+            setMembers((prev) => prev.filter((member) => member.userId !== userId));
+        };
+        const handleAdded = ({ workspaceId: eventWorkspaceId }: WorkspaceMemberEvent) => {
+            if (eventWorkspaceId !== workspaceId) return;
+            getWorkspaceMembersApi(workspaceId).then(setMembers).catch((err) => console.error('Failed to refresh workspace members:', err));
+        };
+        const handleSocketError = ({ message }: { message: string }) => console.error('Socket error:', message);
+
+        connectSocket();
+        joinWorkspace();
+        socket.on('connect', joinWorkspace);
+        socket.on('workspace.member_role_updated', handleRoleUpdated);
+        socket.on('workspace.member_removed', handleRemoved);
+        socket.on('workspace.member_added', handleAdded);
+        socket.on('socket.error', handleSocketError);
+
+        return () => {
+            socket.emit('workspace.leave', { workspaceId });
+            socket.off('connect', joinWorkspace);
+            socket.off('workspace.member_role_updated', handleRoleUpdated);
+            socket.off('workspace.member_removed', handleRemoved);
+            socket.off('workspace.member_added', handleAdded);
+            socket.off('socket.error', handleSocketError);
+        };
     }, [workspaceId]);
 
     // close dropdown when clicking outside
@@ -83,7 +171,7 @@ export function WorkspacePage() {
         try {
             await updateMemberRoleApi(workspaceId, userId, newRole);
             setMembers((prev) =>
-                prev.map((m) => (m.id === memberId ? { ...m, role: newRole as WorkspaceMember['role'] } : m))
+                prev.map((m) => (m.userId === userId ? { ...m, role: newRole as WorkspaceMember['role'] } : m))
             );
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Failed to update role.');
@@ -99,7 +187,7 @@ export function WorkspacePage() {
         setActionLoading(memberId);
         try {
             await removeMemberApi(workspaceId, userId);
-            setMembers((prev) => prev.filter((m) => m.id !== memberId));
+            setMembers((prev) => prev.filter((m) => m.userId !== userId));
         } catch (err) {
             alert(err instanceof Error ? err.message : 'Failed to remove member.');
         } finally {
@@ -207,25 +295,32 @@ export function WorkspacePage() {
                                 Boards
                             </h2>
                             {isAdminOrOwner && (
-                                <Button
-                                    className="flex items-center gap-1.5 text-xs"
-                                    // Board creation will be wired up in the next sprint
-                                    onClick={() => alert('Board creation coming soon!')}
-                                >
+                                <Button className="flex items-center gap-1.5 text-xs" onClick={() => setIsCreatingBoard(true)}>
                                     <Plus className="h-3.5 w-3.5" />
                                     New Board
                                 </Button>
                             )}
                         </div>
 
-                        {/* Empty boards placeholder — real board list will go here */}
-                        <div className="rounded-2xl border border-white/10 bg-[#111b2f] p-8 text-center">
-                            <EmptyState
-                                icon={FolderKanban}
-                                title="No boards yet"
-                                description="Create a board to start organizing tasks in columns."
-                            />
-                        </div>
+                        {boards.length === 0 ? (
+                            <div className="rounded-2xl border border-white/10 bg-[#111b2f] p-8 text-center">
+                                <EmptyState icon={FolderKanban} title="No boards yet" description="Create a board to start organizing tasks in columns." />
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                {boards.map((board) => (
+                                    <button key={board._id} type="button" onClick={() => navigate(`/boards/${board._id}`)} className="group rounded-2xl border border-white/10 bg-[#151f36] p-4 text-left transition hover:-translate-y-0.5 hover:border-primary-400/50">
+                                        <div className="mb-4 flex h-24 items-center justify-center rounded-xl" style={{ background: board.color ?? '#2563EB' }}>
+                                            <FolderKanban className="h-9 w-9 text-white/90" strokeWidth={1.5} />
+                                        </div>
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div><h3 className="font-semibold text-white group-hover:text-primary-300">{board.name}</h3>{board.description && <p className="mt-1 line-clamp-2 text-xs text-slate-400">{board.description}</p>}</div>
+                                            <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase text-slate-400">{board.visibility}</span>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* ─ Members sidebar  */}
@@ -330,6 +425,19 @@ export function WorkspacePage() {
                     </div>
                 </div>
             </div>
+
+            {isCreatingBoard && (
+                <Modal title="Create New Board" onClose={() => setIsCreatingBoard(false)}>
+                    <form onSubmit={handleCreateBoard} className="flex flex-col gap-4">
+                        <Input id="board-name" label="Board Name *" placeholder="e.g. Product Roadmap" value={boardName} onChange={(event) => setBoardName(event.target.value)} required autoFocus />
+                        <div><label htmlFor="board-description" className="mb-1.5 block text-xs font-medium text-slate-300">Description</label><textarea id="board-description" rows={3} value={boardDescription} onChange={(event) => setBoardDescription(event.target.value)} className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 outline-none focus:border-primary-400" placeholder="What will this board track?" /></div>
+            <div><label className="mb-2 block text-xs font-medium text-slate-300">Board Color</label><div className="flex gap-3">{BOARD_COLORS.map((color) => <button key={color.hex} type="button" aria-label={color.label} onClick={() => setBoardColor(color.hex)} style={{ backgroundColor: color.hex }} className={`h-7 w-7 rounded-full ${boardColor === color.hex ? 'ring-2 ring-white ring-offset-2 ring-offset-[#182541]' : 'opacity-75'}`} />)}</div></div>
+                        <div><label htmlFor="board-visibility" className="mb-1.5 block text-xs font-medium text-slate-300">Visibility</label><select id="board-visibility" value={boardVisibility} onChange={(event) => setBoardVisibility(event.target.value as typeof boardVisibility)} className="w-full rounded-xl border border-white/10 bg-[#182541] px-3 py-2 text-sm text-slate-200"><option value="workspace">Workspace</option><option value="private">Private</option><option value="public">Public</option></select></div>
+                        {boardFormError && <p className="text-xs text-rose-400">{boardFormError}</p>}
+                        <div className="mt-2 flex justify-end gap-3 border-t border-white/10 pt-4"><Button type="button" variant="secondary" onClick={() => setIsCreatingBoard(false)}>Cancel</Button><Button type="submit" disabled={isCreatingBoardRequest}>{isCreatingBoardRequest ? 'Creating...' : 'Create Board'}</Button></div>
+                    </form>
+                </Modal>
+            )}
         </DashboardShell>
     );
 }

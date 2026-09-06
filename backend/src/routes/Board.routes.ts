@@ -96,4 +96,13 @@ router.post(
     createTask
 );
 
+router.post(
+    "/:boardId/columns/:columnId/tasks",
+    requireBoardWorkspaceMember,
+    requireWorkspaceRole(["owner", "admin", "member"]),
+    createTaskValidator,
+    validateRequest,
+    createTask
+);
+
 export default router;

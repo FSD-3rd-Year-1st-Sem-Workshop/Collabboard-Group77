@@ -2,12 +2,14 @@ import { createServer } from "http";
 import app from "./app.js";
 import env from "./config/Env.js";
 import { connectDatabase } from "./config/Database.js";
+import { initializeSocket } from "./socket/index.js";
 
 async function startServer(): Promise<void> {
     try {
         await connectDatabase();
 
         const server = createServer(app);
+        initializeSocket(server);
 
         server.listen(env.port, () => {
             console.log(

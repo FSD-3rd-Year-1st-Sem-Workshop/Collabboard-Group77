@@ -8,7 +8,6 @@ import { Input } from '../common/input';
 import { Textarea } from '../common/Textarea';
 import { Select } from '../common/Select';
 import { Button } from '../common/Button';
-import { Avatar } from '../common/Avatar';
 import { PriorityBadge } from './PriorityBadge';
 import { formatDateTime, formatLongDate, toDateInputValue } from '../../utils/date';
 import { useBoards } from '../../hooks/useBoards';
@@ -22,9 +21,8 @@ interface TaskDetailsModalProps {
 
 export function TaskDetailsModal({ task, board, columns, onClose }: TaskDetailsModalProps) {
   const { updateTask, deleteTask } = useBoards();
-  const boardMembers: any[] = [];
-  const assignee: any = null;
-  const createdBy: any = null;
+  void board;
+  const boardMembers: Array<{ id: string; name: string }> = [];
 
   const [isEditing, setIsEditing] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -136,29 +134,11 @@ export function TaskDetailsModal({ task, board, columns, onClose }: TaskDetailsM
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-xs font-medium text-slate-400">Assigned to</p>
-            {assignee ? (
-              <div className="mt-1.5 flex items-center gap-2">
-                <Avatar user={assignee} size="sm" />
-                <div>
-                  <p className="text-sm font-medium text-slate-700">{assignee.name}</p>
-                  <p className="text-xs text-slate-400">{assignee.email}</p>
-                </div>
-              </div>
-            ) : (
-              <p className="mt-1 text-sm text-slate-400">Unassigned</p>
-            )}
+            <p className="mt-1 text-sm text-slate-400">Unassigned</p>
           </div>
           <div>
             <p className="text-xs font-medium text-slate-400">Created by</p>
-            {createdBy && (
-              <div className="mt-1.5 flex items-center gap-2">
-                <Avatar user={createdBy} size="sm" />
-                <div>
-                  <p className="text-sm font-medium text-slate-700">{createdBy.name}</p>
-                  <p className="text-xs text-slate-400">{createdBy.email}</p>
-                </div>
-              </div>
-            )}
+            <p className="mt-1 text-sm text-slate-400">Unknown</p>
           </div>
         </div>
 
