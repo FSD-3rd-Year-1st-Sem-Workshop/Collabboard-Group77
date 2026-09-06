@@ -5,18 +5,23 @@ export function useSocket(boardId?: string, workspaceId?: string) {
     useEffect(() => {
         connectSocket();
 
-        if (boardId) {
-            socket.emit('board.join', { boardId });
-        }
-        if (workspaceId) {
-            socket.emit('workspace.join', { workspaceId });
+        const joinRooms = () => {
+            if (boardId) socket.emit('board.join', { boardId });
+            if (workspaceId) socket.emit('workspace.join', { workspaceId });
+        };
+
+        if (socket.connected) {
+            joinRooms();
         }
 
+        socket.on('connect', joinRooms);
+
         return () => {
-            if (boardId) {
+            socket.off('connect', joinRooms);
+            if (boardId && socket.connected) {
                 socket.emit('board.leave', { boardId });
             }
-            if (workspaceId) {
+            if (workspaceId && socket.connected) {
                 socket.emit('workspace.leave', { workspaceId });
             }
         };
