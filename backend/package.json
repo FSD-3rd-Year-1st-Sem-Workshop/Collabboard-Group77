@@ -7,9 +7,9 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "tsc && node -e \"fs.copyFileSync('src/openapi.yaml', 'dist/openapi.yaml')\"",
     "start": "node dist/server.js",
-    "test": "node --test",
+    "test": "tsx --test tests/**/*.test.ts",
     "lint": "eslint .",
     "format": "prettier --write .",
     "doc:tree:md": "npx tree-node-cli -I \"node_modules|.git|coverage|dist\" -a -o STRUCTURE.md"

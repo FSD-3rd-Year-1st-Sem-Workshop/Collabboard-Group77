@@ -24,7 +24,6 @@ export function notFoundHandler(req: Request, _res: Response, next: NextFunction
   next(new AppError(`Route not found: ${req.method} ${req.originalUrl}`, 404));
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function errorHandler(
   error: any,
   _req: Request,

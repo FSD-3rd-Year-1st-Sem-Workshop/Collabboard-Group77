@@ -2,9 +2,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const requiredSecrets = ["JWT_ACCESS_SECRET", "JWT_REFRESH_SECRET"] as const;
+const _requiredSecrets = ["JWT_ACCESS_SECRET", "JWT_REFRESH_SECRET"] as const;
 
-function getSecret(key: (typeof requiredSecrets)[number]): string {
+function getSecret(key: (typeof _requiredSecrets)[number]): string {
   const value = process.env[key];
 
   if (!value) {

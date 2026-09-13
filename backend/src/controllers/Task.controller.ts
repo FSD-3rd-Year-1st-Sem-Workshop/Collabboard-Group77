@@ -91,9 +91,15 @@ export async function updateTask(
 ): Promise<Response | void> {
     try {
         const task = req.task;
+        const { version } = req.body;
 
         if (task.archived) {
             throw new AppError("Cannot update an archived task", 400);
+        }
+
+        // Optimistic Concurrency Control
+        if (task.version !== version) {
+            throw new AppError("Task version mismatch. Your data is out of date, please refresh and try again.", 409);
         }
 
         if (req.body.title !== undefined) task.title = req.body.title;
@@ -161,10 +167,15 @@ export async function assignTask(
 ): Promise<Response | void> {
     try {
         const task = req.task;
-        const { assignedTo } = req.body;
+        const { assignedTo, version } = req.body;
 
         if (task.archived) {
             throw new AppError("Cannot assign users to an archived task", 400);
+        }
+
+        // Optimistic Concurrency Control
+        if (task.version !== version) {
+            throw new AppError("Task version mismatch. Your data is out of date, please refresh and try again.", 409);
         }
 
         task.assignedTo = assignedTo;
