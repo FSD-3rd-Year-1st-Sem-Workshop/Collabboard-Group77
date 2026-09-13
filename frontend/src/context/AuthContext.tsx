@@ -7,12 +7,13 @@ const API_BASE_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:5000'
 
 const STORAGE_KEY = 'collabboard.session';
 
-function normalizeUser(rawUser: any): User {
+function normalizeUser(rawUser: unknown): User {
+  const user = rawUser as Record<string, unknown> | null | undefined;
   return {
-    id: String(rawUser?.id ?? rawUser?._id ?? 'user-unknown'),
-    name: rawUser?.fullName ?? rawUser?.name ?? rawUser?.email ?? 'User',
-    email: rawUser?.email ?? '',
-    avatarColor: rawUser?.avatarColor ?? 'bg-[#00A884]',
+    id: String(user?.id ?? user?._id ?? 'user-unknown'),
+    name: String(user?.fullName ?? user?.name ?? user?.email ?? 'User'),
+    email: String(user?.email ?? ''),
+    avatarColor: String(user?.avatarColor ?? 'bg-[#00A884]'),
   };
 }
 
@@ -26,6 +27,7 @@ export interface AuthContextValue {
   logout: () => Promise<void>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -58,7 +60,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             body: JSON.stringify({}),
           });
           if (refreshRes.ok) {
-            const refreshData = await refreshRes.json().catch(() => ({} as any));
+            interface RefreshData {
+              data?: { accessToken?: string };
+              accessToken?: string;
+            }
+            const refreshData = await refreshRes.json().catch(() => ({} as RefreshData));
             const newToken = refreshData?.data?.accessToken ?? refreshData?.accessToken;
             if (newToken) {
               setTokens({ accessToken: newToken });

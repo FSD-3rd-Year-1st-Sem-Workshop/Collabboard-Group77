@@ -10,6 +10,7 @@ import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { ProfilePage } from '../pages/ProfilePage';
 import { WorkspaceSettingsPage } from '../pages/WorkspaceSettingsPage';
+import { InvitationsPage } from '../pages/InvitationsPage';
 
 export function AppRoutes() {
   return (
@@ -80,6 +81,15 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <ComingSoonPage title="Settings" icon={Settings} />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/invitations"
+        element={
+          <ProtectedRoute>
+            <InvitationsPage />
           </ProtectedRoute>
         }
       />
