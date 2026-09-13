@@ -1,13 +1,13 @@
 import { Link } from 'react-router-dom';
 import { Star, LayoutGrid } from 'lucide-react';
-import type { Board } from '../../types/index';
+import type { Board, User } from '../../types/index';
 import { AvatarGroup } from '../common/AvatarGroup';
 import { useBoards } from '../../hooks/useBoards';
 import { cn } from '../../utils/cn';
 
 export function BoardCard({ board }: { board: Board }) {
   const { toggleStar, tasks } = useBoards();
-  const members: any[] = [];
+  const members: User[] = [];
   const taskCount = tasks.filter((t) => t.boardId === board.id).length;
 
   return (
