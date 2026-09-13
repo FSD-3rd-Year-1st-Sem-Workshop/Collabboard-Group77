@@ -8,6 +8,7 @@ import YAML from "yamljs";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import env from "./config/Env.js";
 import authRoutes from "./routes/Auth.routes.js";
 import workspaceRoutes from "./routes/Workspace.routes.js";
 import dashboardRoutes from "./routes/Dashboard.routes.js";
@@ -43,10 +44,10 @@ app.use(
     })
 );
 
-// Enable CORS for all origins, supporting httpOnly cookies/credentials
+// Enable CORS with the configured frontend URL
 app.use(
     cors({
-        origin: true,
+        origin: env.clientUrl,
         credentials: true
     })
 );

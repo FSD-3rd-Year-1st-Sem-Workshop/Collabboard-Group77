@@ -60,7 +60,6 @@ const workspaceInvitationSchema = new Schema(
 
 // Compound index to prevent duplicate pending invitations to the same email in a workspace
 workspaceInvitationSchema.index({ workspace: 1, email: 1, status: 1 });
-workspaceInvitationSchema.index({ token: 1 });
 
 export type IWorkspaceInvitation = InferSchemaType<typeof workspaceInvitationSchema> & Document;
 export default mongoose.model<IWorkspaceInvitation>("WorkspaceInvitation", workspaceInvitationSchema);
