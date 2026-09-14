@@ -73,3 +73,6 @@ after run this >
 
 # we are all good to go :)
 #group77-CollabBoard
+
+Server running on http://localhost:5000 (development)
+API Docs (Scalar): http://localhost:5000/api/docs

@@ -1,5 +1,5 @@
 import { authFetchWithRefresh } from '../utils/authFetch';
-import type { CreateWorkspaceInput, Workspace, WorkspaceMember } from '../types';
+import type { CreateWorkspaceInput, Workspace, WorkspaceMember, WorkspaceInvitation } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:5000';
 
@@ -90,7 +90,7 @@ export async function createInvitationApi(workspaceId: string, email: string, ro
   return data?.data;
 }
 
-export async function getInvitationsApi(workspaceId: string): Promise<string[]> {
+export async function getInvitationsApi(workspaceId: string): Promise<WorkspaceInvitation[]> {
   const response = await authFetchWithRefresh(`${API_BASE_URL}/api/workspaces/${workspaceId}/invitations`, {
     method: 'GET'
   });

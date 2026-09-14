@@ -88,6 +88,7 @@ export interface BoardContextValue extends BoardState {
   addBoard: (name: string) => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const BoardContext = createContext<BoardContextValue | undefined>(undefined);
 
 

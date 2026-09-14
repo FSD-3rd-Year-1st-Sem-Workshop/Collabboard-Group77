@@ -1,3 +1,5 @@
+\
+
 const ACCESS_TOKEN_KEY = 'collabboard.accessToken';
 const REFRESH_TOKEN_KEY = 'collabboard.refreshToken';
 const REMEMBER_ME_KEY = 'collabboard.rememberMe';
@@ -112,7 +114,13 @@ async function doRefresh(): Promise<string | null> {
     return null;
   }
 
-  const refreshData = await refreshResponse.json().catch(() => ({} as any));
+  interface RefreshData {
+    data?: { accessToken?: string; refreshToken?: string };
+    accessToken?: string;
+    refreshToken?: string;
+  }
+
+  const refreshData = await refreshResponse.json().catch(() => ({} as RefreshData));
   const newToken = refreshData?.data?.accessToken ?? refreshData?.accessToken;
   const newRefreshToken = refreshData?.data?.refreshToken ?? refreshData?.refreshToken;
 
@@ -125,7 +133,7 @@ async function doRefresh(): Promise<string | null> {
 }
 
 export async function authFetchWithRefresh(input: RequestInfo | URL, init: RequestInit = {}) {
-  let response = await authFetch(input, init);
+  const response = await authFetch(input, init);
 
   if (response.status !== 401) {
     return response;

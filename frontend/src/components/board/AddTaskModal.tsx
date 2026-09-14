@@ -16,7 +16,7 @@ interface AddTaskModalProps {
 
 export function AddTaskModal({ board, columns, defaultStatus, onClose }: AddTaskModalProps) {
   const { addTask } = useBoards();
-  const boardMembers: any[] = [];
+  const boardMembers: Array<{ id: string; name: string }> = [];
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');

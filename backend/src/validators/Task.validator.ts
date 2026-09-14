@@ -25,6 +25,11 @@ export const createTaskValidator = [
 ];
 
 export const updateTaskValidator = [
+    body("version")
+        .isNumeric()
+        .notEmpty()
+        .withMessage("Task version is required for optimistic concurrency control"),
+
     body("title")
         .optional()
         .trim()
@@ -69,6 +74,11 @@ export const moveTaskValidator = [
 ];
 
 export const assignTaskValidator = [
+    body("version")
+        .isNumeric()
+        .notEmpty()
+        .withMessage("Task version is required for optimistic concurrency control"),
+
     body("assignedTo")
         .isArray()
         .withMessage("Assigned users must be an array of user IDs"),

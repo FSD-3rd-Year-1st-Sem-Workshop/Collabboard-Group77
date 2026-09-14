@@ -209,7 +209,7 @@ export function WorkspaceSettingsPage() {
                                         <label className="block text-xs font-medium text-slate-400 mb-1">Visibility</label>
                                         <select
                                             value={visibility}
-                                            onChange={(e) => setVisibility(e.target.value as any)}
+                                            onChange={(e) => setVisibility(e.target.value as 'private' | 'public')}
                                             className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 outline-none transition focus:border-primary-500/50 focus:bg-white/10"
                                         >
                                             <option value="private">Private</option>
@@ -274,7 +274,7 @@ export function WorkspaceSettingsPage() {
                                         <div className="relative">
                                     <select
                                         value={inviteRole}
-                                        onChange={(e) => setInviteRole(e.target.value as any)}
+                                        onChange={(e) => setInviteRole(e.target.value as 'admin' | 'member')}
                                         className="
                                             w-full appearance-none rounded-lg border border-white/10 bg-slate-900 px-3 py-2 pr-9
                                             text-sm text-slate-200 outline-non transition-all cursor-pointer

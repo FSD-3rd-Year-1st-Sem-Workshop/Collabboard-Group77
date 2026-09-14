@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { LayoutGrid, Plus, CheckCircle2, Clock, Layers, Users, FolderKanban } from 'lucide-react';
 import { DashboardShell } from '../components/layout/DashboardShell';
 import { EmptyState } from '../components/common/EmptyState';
@@ -39,7 +39,7 @@ export function DashboardPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     setIsLoading(true);
     setError('');
     try {
@@ -62,11 +62,11 @@ export function DashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+  }, [loadDashboardData]);
 
   async function handleCreateWorkspace(event: FormEvent) {
     event.preventDefault();

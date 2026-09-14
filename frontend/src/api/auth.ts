@@ -71,14 +71,21 @@ export interface ProfileUser {
   avatar: string | null;
 }
 
-function readProfile(data: any): ProfileUser {
-  const rawUser = data?.data?.user ?? data?.data ?? data?.user ?? data;
+function readProfile(data: unknown): ProfileUser {
+  interface ApiData {
+    data?: {
+      user?: Record<string, unknown>;
+    };
+    user?: Record<string, unknown>;
+  }
+  const apiResponse = data as ApiData;
+  const rawUser = (apiResponse?.data?.user ?? apiResponse?.data ?? apiResponse?.user ?? apiResponse) as Record<string, any>;
   return {
     id: String(rawUser?.id ?? rawUser?._id ?? ''),
-    fullName: rawUser?.fullName ?? rawUser?.name ?? '',
-    email: rawUser?.email ?? '',
-    bio: rawUser?.bio ?? '',
-    avatar: rawUser?.avatar ?? null,
+    fullName: String(rawUser?.fullName ?? rawUser?.name ?? ''),
+    email: String(rawUser?.email ?? ''),
+    bio: String(rawUser?.bio ?? ''),
+    avatar: rawUser?.avatar ? String(rawUser.avatar) : null,
   };
 }
 
